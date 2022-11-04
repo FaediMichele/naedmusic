@@ -1,0 +1,156 @@
+#:kivy 1.10.0
+
+<AppRoot>:
+    topbar: topbar
+    scroll: scroll
+    loading_spinner: loading_spinner
+    orientation: 'vertical'
+    spacing: 15
+
+    MDTopAppBar:
+        id: topbar
+        title: "MusicApp"
+        left_action_items: [["blank"]]
+        #right_action_items: [["blank"]]
+        anchor_title: "center"
+        right_action_items: [["album", lambda x: root.launch_category_dialog()]]
+
+    MDSpinner:
+        id: loading_spinner
+        size_hint: None, None
+        size: dp(56), dp(56)
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        active: True
+
+    MyScrollView:
+        id: scroll
+        do_scroll_x: False
+        do_scroll_y: True
+        scroll_wheel_distance: 60
+        MyMDList:
+            id: playlist_container
+            padding: self.parent.width / 6, 0
+            spacing: self.parent.width / 36
+
+<PlaylistBar>:
+    orientation: "horizontal"
+    height:"56dp"
+    size_hint_y: None
+    size_hint_x: 1
+    md_bg_color: app.theme_cls.primary_color
+    padding: "10dp", 0, 0, 0
+
+    id: playlist_bar
+    song_name: song_name
+    song_field: song_field
+    image: image
+    next_song: next_song
+    pause_song: pause_song
+    add_song_to: add_song_to
+    shuffle_playlist: shuffle_playlist
+    
+    FitImage:
+        id: image
+        source: 'http://picsum.photos/900'
+        halign: "center"
+        radius: [self.height, ]
+        size: self.height, self.height
+        size_hint_x: None
+        
+    MDBoxLayout:
+        orientation: "vertical"
+        size_hint: 1, 1
+        padding: "10dp", 0, 0, 0
+        MDLabel:
+            id: song_name
+            valign: "top"
+            text: "I rabarbari rossi"
+            font_style: "Subtitle1"
+        MDLabel:
+            id: song_field
+            valign: "bottom"
+            text: "Piero il pescatore"
+            font_style: "Subtitle2"
+    MDGridLayout:
+        cols: 4
+        size_hint_y: 1
+        size_hint_x: None
+        width: (pause_song.width + next_song.width + add_song_to.width + shuffle_playlist.width)
+        pos_hint: {"center_x": 0.5, "center_y": .5}
+        halign: "right"
+
+        MDIconButton:
+            id: add_song_to
+            icon: "plus"
+            user_font_size: "56"
+            pos_hint: {"center_x": 0.5, "center_y": .5}
+
+        MDIconButton:
+            id: shuffle_playlist
+            icon: "backup-restore"
+            user_font_size: "56"
+            pos_hint: {"center_x": 0.5, "center_y": .5}
+        MDIconButton:
+            id: pause_song
+            icon: "pause"
+            user_font_size: "56"
+            pos_hint: {"center_x": 0.5, "center_y": .5}
+        MDIconButton:
+            id: next_song
+            icon: "skip-next"
+            user_font_size: "56"
+            pos_hint: {"center_x": 0.5, "center_y": .5}
+            
+<PlaylistItem>:
+    name: name
+    image: image
+
+    cols: 1
+    ripple_behavior: True
+    focus_behavior: True
+    focus_color: app.theme_cls.primary_light
+    unfocus_color: app.theme_cls.accent_color
+    md_bg_color: app.theme_cls.accent_color
+    orientation: "vertical"
+    size_hint_y: None
+    size: "280dp", "240dp"
+    FitImage:
+        id: image
+        source: 'http://picsum.photos/300'
+        halign: "center"
+        keep_ratio: True
+        size: self.parent.size
+        size_hint_y: 5
+    MDBoxLayout:
+        orientation: "horizontal"
+        size_hint: 1,1
+        MDLabel:
+            id: name
+            halign: "center"
+            font_style: "H6"
+            text: "Unknown"
+            valign: 'center'
+            size_hint_x: 4
+
+<ItemConfirm>
+    on_release : root.set_icon(check)
+
+    CheckboxLeftWidget:
+        id: check
+
+<ItemConfirmExclusive>
+    on_release : root.set_icon(check)
+
+    CheckboxLeftWidget:
+        id: check
+        group: "check"
+
+<NewRenameDialogContent>
+    orientation: "vertical"
+    size_hint_y: None
+    height: "48dp"
+    text_field: text_field
+
+    MDTextField:
+        id: text_field
+        hint_text: ""

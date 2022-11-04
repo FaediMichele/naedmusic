@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+logfile
+.vscode/
 
 # C extensions
 *.so
@@ -9,6 +11,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+bin/
+.buildozer/
 develop-eggs/
 dist/
 downloads/

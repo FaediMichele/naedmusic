@@ -1,0 +1,6 @@
+kivy[base,media,tuio]
+kivymd == 1.1.1
+pillow
+mutagen
+sdl2_ttf == 2.0.15
+ffpyplayer
