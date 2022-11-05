@@ -3,9 +3,9 @@ from lib.platform.audioplayer import AudioPlayer
 from lib.platform.datamanager import DataManager
 from kivy.clock import Clock
 from typing import Callable
-from android.storage import primary_external_storage_path
-from android.permissions import request_permissions, Permission, check_permission
-from jnius import autoclass, PythonJavaClass, java_method
+from android.storage import primary_external_storage_path # type: ignore
+from android.permissions import request_permissions, Permission, check_permission # type: ignore
+from jnius import autoclass, PythonJavaClass, java_method # type: ignore
 
 perms = [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE]
 
@@ -113,10 +113,10 @@ class AndroidAudioPlayer(AudioPlayer):
             self.mplayer.start()
         self.state = not self.state
 
-    def __on_song_end(self, _):
+    def __on_song_end(self, mp):
         self.state = False
-        self.dispatch("on_song_end", self)
-
+        Clock.schedule_once(lambda _: self.on_song_end(mp))
+        
     def __load(self, filename):
         if self.mplayer is None:
             self.mplayer = self.MediaPlayer()

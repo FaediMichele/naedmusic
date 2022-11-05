@@ -3,7 +3,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.spinner import MDSpinner
 from kivymd.uix.snackbar import Snackbar
 from threading import Thread
-import lib.ui.scroll # NOQA
+import lib.ui.scroll # type: ignore
 from lib.platform.datamanager import get_data_manager
 from lib.ui.category_dialog import CategoryDialog
 from playing_bar import PlaylistBar
@@ -11,6 +11,7 @@ from localization import localization
 import logging
 from kivy.clock import Clock
 from functools import partial
+from util import show_snackbar
 
 class AppRoot(MDBoxLayout):
     '''Application root that contains every other widgets.
@@ -54,7 +55,7 @@ class AppRoot(MDBoxLayout):
         '''
         if not status:
             def no_permission(_):
-                Snackbar(text=localization["errors"]["asking_permissions"]).open()
+                show_snackbar(localization["errors"]["asking_permissions"])
                 self.__set_loading_state(False)
                 self.broken_state = True
             Clock.schedule_once(no_permission)

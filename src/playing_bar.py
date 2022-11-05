@@ -9,6 +9,8 @@ from kivymd.app import MDApp
 from mutagen.easyid3 import EasyID3
 import os
 from datetime import date
+from util import show_snackbar, truncate_text
+from kivy.clock import Clock
 
 random.seed(date.today().month*100 + date.today().day)
 
@@ -92,6 +94,7 @@ class PlaylistBar(MDBoxLayout):
         self.next_song.bind(on_press=lambda _: self.next())
         self.shuffle_playlist.bind(on_press=lambda _: self.__on_shuffle())
         self.add_song_to.bind(on_press=lambda _: self.__on_added_to_playlist())
+        self.song_name.bind(on_size=self.on_size)
         self.player = get_audio_player()
         self.player.on_song_end = lambda _: self.__on_song_end()
 
@@ -106,9 +109,15 @@ class PlaylistBar(MDBoxLayout):
         self.songs = data["songs"].copy()
         self.index = 0
         self.close()
+        Clock.schedule_once(lambda _: self.__update_text_field_text(), 0.1)
 
         if get_data_manager().store["config"]["shuffle"]:
             self.shuffle()
+
+    
+    def on_size(self,_, _1):
+        '''Callback called when the size of the window change'''
+        self.__update_text_field_text()
 
 
     def play(self) -> bool:
@@ -124,22 +133,23 @@ class PlaylistBar(MDBoxLayout):
             self.player.open_sound(song)
             try:
                 id3 = EasyID3(song)
-                self.song_name.text = id3["title"][0]
-                self.song_field.text = id3["album"][0]
+                self.song_name.not_truncated_text = id3["title"][0]
+                self.song_field.not_truncated_text = id3["album"][0]
                 self.image.source = get_data_manager().get_image([song])
                 self.pause_song.icon = "pause"
-                return True
             except Exception as e:
-                Snackbar(text=f"Error reading {song} infos.\nMessage={str(e)}.").open()
-                self.song_name.text = os.path.basename(song)
-                self.song_field.text = ""
-                self.image.source.text = ""
+                show_snackbar(f"Error reading {song} infos.\nMessage={str(e)}.")
+                self.song_name.not_truncated_text = os.path.basename(song)
+                self.song_field.not_truncated_text = ""
+                self.image.source = ""
                 self.pause_song.icon = "pause"
-                return True
         except Exception as e:
-            Snackbar(text=f"Error reading {song} and cannot be played.\nMessage={str(e)}.").open()
+            show_snackbar(f"Error reading {song} and cannot be played.\nMessage={str(e)}.")
             self.pause_song.icon = "play"
+            self.__update_text_field_text()
             return False
+        self.__update_text_field_text()
+        return True
 
 
     def next(self) -> None:
@@ -191,7 +201,12 @@ class PlaylistBar(MDBoxLayout):
             if data_manager.store["config"]["last_category"] == "playlist":
                 MDApp.get_running_app().root.set_category("playlist", force_reload=True)
 
-        AddToPlaylistDialog(self.songs[self.index], self.song_name.text, on_dialog_ended=update_view).show_dialog()
+        AddToPlaylistDialog(self.songs[self.index], self.song_name.not_truncated_text, on_dialog_ended=update_view).show_dialog()
+
+    def __update_text_field_text(self):
+            if self.song_name is not None and self.song_field is not None:
+                self.song_name.text = truncate_text(self.song_name.not_truncated_text, 2, 15, self.song_name.size[0])
+                self.song_field.text = truncate_text(self.song_field.not_truncated_text, 1, 15, self.song_field.size[0])
 
     
         
