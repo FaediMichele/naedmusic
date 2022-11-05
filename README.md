@@ -14,8 +14,8 @@ It saves a file called playlist.json on ~/playlist.json if Windows or linux; on 
 
 ## Future features
 - Change configuration file (playlist.json) name and possibly location
-- Change the gui for the playlist creation, edit and deletion.
-- Add hamhurger menu for configuration, about, ...
+- Change the gui for the playlist creation, edit and deletion. Now is functional but very counterintuitive, also bugged on smarphones
+- Add hamburger menu for configuration, about, ...
 - Search songs in other directory
 - Exclude songs/directory
 - Pin custom playlist(only favourites is pinned)
@@ -26,3 +26,6 @@ It saves a file called playlist.json on ~/playlist.json if Windows or linux; on 
 - KivyMD does not work on android with version 1.2.0, actual 1.0.1 (https://github.com/kivymd/KivyMD/issues/1352)
 - On linux the music use the pc default speakers. When bluetooth speaker or headphones is connected it does not use them
 
+### Usefull suggestion(mostly for myself)
+- To build for android run: "buildozer android adb -- logcat -c &&  buildozer android update debug deploy run logcat | grep python". It will clear all previous logcat and showing only the usefull ones.
+- 

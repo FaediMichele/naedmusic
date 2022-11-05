@@ -1,6 +1,9 @@
+'''
+Loads the strings for the current os language
+'''
 import locale
 
-languages = [
+__languages = [
     {"names": ["en_EN", "en_US"], "value": {
         "category_names": [("artist", "Artist"), ("album", "Album"), ("playlist", "Playlist")],
         "category_dialog": {
@@ -30,7 +33,8 @@ languages = [
         "empty_playlist": "This playlist is empty!",
         "errors": {
             "read_infos": "Error reading {song} infos. Message: {msg}.",
-            "opening_sound": "Error reading {song} and cannot be played. Message: {msg}."
+            "opening_sound": "Error reading {song} and cannot be played. Message: {msg}.",
+            "asking_permissions": "Permissions to use memory not granted. The application will not load the songs!"
         },
         "favorites": "Favorites"
     }},
@@ -69,7 +73,7 @@ languages = [
     }}
 ]
 
-localization = languages[0]["value"]
-for l in languages:
+localization = __languages[0]["value"]
+for l in __languages:
     if locale.getlocale()[0] in l["names"]:
         localization = l["value"]
