@@ -2,6 +2,7 @@ from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.label import MDLabel
 from kivy.uix.widget import Widget
 import math
+from kivy.metrics import dp
 
 def show_snackbar(text: str, lines=2, font_size=15):
     '''Create and open a Snackbar. The text is autotruncated on the selected lines. Since the correct cut is not a linear function sometimes it may leave some character in a new line
@@ -40,7 +41,7 @@ def truncate_text(text: str, lines: int, font_size: int, widget_size: int) -> st
     Return the truncated string
     '''
     
-    character_for_line = widget_size / __calc_character_size_for_dp(font_size)
+    character_for_line = (widget_size / dp(1)) / __calc_character_size_for_dp(font_size)
     if character_for_line > 0:
         num_lines = len(text) // character_for_line + 1
         if num_lines > lines:
