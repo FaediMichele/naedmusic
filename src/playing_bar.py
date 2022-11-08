@@ -131,22 +131,22 @@ class PlaylistBar(MDBoxLayout):
         song = os.path.join(data_manager.base_path, self.songs[self.index])
         try:
             self.player.open_sound(song)
-            try:
-                id3 = EasyID3(song)
-                self.song_name.not_truncated_text = id3["title"][0]
-                self.song_field.not_truncated_text = id3["album"][0]
-                self.image.source = get_data_manager().get_image([song])
-                self.pause_song.icon = "pause"
-            except Exception as e:
-                show_snackbar(f"Error reading {song} infos.\nMessage={str(e)}.")
-                self.song_name.not_truncated_text = os.path.basename(song)
-                self.song_field.not_truncated_text = ""
-                self.image.source = ""
-                self.pause_song.icon = "pause"
+            self.song_name.not_truncated_text = ""
+            self.song_field.not_truncated_text = ""
+            self.__update_labels(song)
+        except TypeError as e:
+            # Changing the ui outside its thread(When the player send the end callback on other thread)
+            if str(e) == "Cannot create graphics instruction outside the main Kivy thread":
+                def update_asyc_ui(_):
+                    self.__update_labels(song)
+                    self.__update_text_field_text()
+                Clock.schedule_once(update_asyc_ui)
+                return True
+            
+            raise e
         except Exception as e:
             show_snackbar(f"Error reading {song} and cannot be played.\nMessage={str(e)}.")
             self.pause_song.icon = "play"
-            self.__update_text_field_text()
             return False
         self.__update_text_field_text()
         return True
@@ -186,6 +186,18 @@ class PlaylistBar(MDBoxLayout):
                 self.pause_song.icon = "pause"
             else:
                 self.pause_song.icon = "play"
+
+    def __update_labels(self, song):
+        try:
+            self.image.source = get_data_manager().get_image([song])
+            id3 = EasyID3(song)
+            self.song_name.not_truncated_text = id3["title"][0]
+            self.song_field.not_truncated_text = id3["album"][0]
+        except Exception as e:
+            show_snackbar(f"Error reading {song} infos.\nMessage={str(e)}.")
+            self.song_name.not_truncated_text = os.path.basename(song)
+            self.song_field.not_truncated_text = ""
+        self.pause_song.icon = "pause"
 
     def __on_shuffle(self):
         self.shuffle()

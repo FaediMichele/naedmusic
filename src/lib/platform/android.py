@@ -51,6 +51,7 @@ class AndroidDataManager(DataManager):
 class AndroidAudioPlayer(AudioPlayer):
     '''AudioPlayer for Android. Use android.media.MediaPlayer'''
 
+    mplayer = None
     def __init__(self, on_song_end=lambda:None, **kwargs):
         '''Create a new AndroidAudioPlayer
         
@@ -61,7 +62,6 @@ class AndroidAudioPlayer(AudioPlayer):
         '''
         super().__init__(on_song_end, **kwargs)
         self.MediaPlayer = autoclass('android.media.MediaPlayer')
-        self.mplayer = self.MediaPlayer()
         self.length = 0
         self.state = False
 
@@ -115,7 +115,7 @@ class AndroidAudioPlayer(AudioPlayer):
 
     def __on_song_end(self, mp):
         self.state = False
-        Clock.schedule_once(lambda _: self.on_song_end(mp))
+        self.on_song_end(mp)
         
     def __load(self, filename):
         if self.mplayer is None:

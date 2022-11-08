@@ -130,7 +130,7 @@ class DataManager():
                 for file in files:
                     if regex.search(file):
                         return os.path.join(path, file)
-        return ""
+        return "data/gelbe_Note.png"
 
     def __put_data_rec(self, base, path, value):
         if len(path) > 0:
