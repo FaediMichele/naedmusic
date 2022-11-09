@@ -6,7 +6,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.uix.list.list import CheckboxLeftWidget
-from localization import localization
+from lib.localization import localization
 from lib.platform.datamanager import get_data_manager
 from kivy.uix.boxlayout import BoxLayout
 from typing import Callable, Any
@@ -53,22 +53,19 @@ class AddToPlaylistDialog():
     _new_dialog = None
     _last_selected = None
 
-    def __init__(self, song_path: str, song_name: str,on_dialog_ended: Callable[[], Any], playlist_list: list[dict["name": str, "image": str, "songs": list[str]]]=None, **kwargs):
+    def __init__(self, id_song: int, on_dialog_ended: Callable[[], Any], playlist_list: list[dict]=None, **kwargs):
         '''Create a new AddToPlaylistDialog
         
         Arguments
         ---------
-        song_path : string
-            Path of the song
-        song_name : string
-            Name of the song
+        id_song : int
+            Id of the song
         on_dialog_ended : () -> None
             Callback called when the dialog is closed positively or negatively
         '''
         super().__init__(**kwargs)
         datamanager = get_data_manager()
-        self._song_path = song_path
-        self._song_name = song_name
+        self.song = datamanager.store["data"]["songs"][id_song]
         self._on_dialog_ended = on_dialog_ended
         if playlist_list is None:
             self._playlists, self._playlists_indexes = self.__get_playlist(datamanager.store["data"]["playlist"])
@@ -239,7 +236,7 @@ class AddToPlaylistDialog():
 
     def __get_playlist(self, playlist_list):
         def key(x):
-            if self._song_path in playlist_list[x]["songs"]:
+            if self.song["id"] in playlist_list[x]["songs"]:
                 return "a"+playlist_list[x]["name"]
             else:
                 return "z"+playlist_list[x]["name"]
@@ -253,16 +250,16 @@ class AddToPlaylistDialog():
         self._on_dialog_ended = lambda:None
         playlist_list=self.__calculate_new_playlist_data()
         self._dialog.dismiss()
-        AddToPlaylistDialog(self._song_path, self._song_name, old_callback, playlist_list=playlist_list).show_dialog()
+        AddToPlaylistDialog(self.song["id"], old_callback, playlist_list=playlist_list).show_dialog()
 
 
 
 
     def __create_dialog(self):
-        self._items = [ItemConfirm(playlist_index=i, text=pl["name"], value=self._song_path in pl["songs"], on_selected_item=self.on_item_selected) for i, pl in enumerate(self._playlists)]
+        self._items = [ItemConfirm(playlist_index=i, text=pl["name"], value=self.song["id"] in pl["songs"], on_selected_item=self.on_item_selected) for i, pl in enumerate(self._playlists)]
         
         self._dialog = MDDialog(
-            title=localization["add_to_playlist_dialog"]["title"].format(name=self._song_name),
+            title=localization["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
             type="confirmation",
             items=self._items,
             buttons=[
@@ -381,10 +378,10 @@ class AddToPlaylistDialog():
 
     def __calculate_new_playlist_data(self):
         for i, playlist in enumerate(self._playlists):
-            if self._song_path not in playlist["songs"] and self._items[i].ids["check"].active:
-                playlist["songs"].append(self._song_path)
-            elif self._song_path in playlist["songs"] and not self._items[i].ids["check"].active:
-                playlist["songs"].remove(self._song_path)
+            if self.song["id"] not in playlist["songs"] and self._items[i].ids["check"].active:
+                playlist["songs"].append(self.song["id"])
+            elif self.song["id"] in playlist["songs"] and not self._items[i].ids["check"].active:
+                playlist["songs"].remove(self.song["id"])
         return [self._playlists[self._playlists_indexes[i]] for i in range(len(self._playlists_indexes))]    
 
 class ItemConfirm(OneLineAvatarIconListItem):

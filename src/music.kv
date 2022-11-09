@@ -1,35 +1,37 @@
 #:kivy 1.10.0
 
-<AppRoot>:
-    topbar: topbar
-    scroll: scroll
-    loading_spinner: loading_spinner
-    orientation: 'vertical'
-    spacing: 15
+<Front>:
+    MDBoxLayout:
+        id: layout
+        topbar: topbar
+        scroll: scroll
+        loading_spinner: loading_spinner
+        orientation: 'vertical'
+        spacing: 15
 
-    MDTopAppBar:
-        id: topbar
-        title: "MusicApp"
-        left_action_items: [["blank"]]
-        anchor_title: "center"
-        right_action_items: [["album", lambda x: root.launch_category_dialog()]]
+        MDTopAppBar:
+            id: topbar
+            title: "MusicApp"
+            left_action_items: [["magnify",  lambda x: root.search()]]
+            anchor_title: "center"
+            right_action_items: [["album", lambda x: root.launch_category_dialog()]]
 
-    MDSpinner:
-        id: loading_spinner
-        size_hint: None, None
-        size: dp(56), dp(56)
-        pos_hint: {'center_x': .5, 'center_y': .5}
-        active: True
+        MDSpinner:
+            id: loading_spinner
+            size_hint: None, None
+            size: dp(56), dp(56)
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            active: True
 
-    MyScrollView:
-        id: scroll
-        do_scroll_x: False
-        do_scroll_y: True
-        scroll_wheel_distance: 60
-        MyMDList:
-            id: playlist_container
-            padding: self.parent.width / 6, 0
-            spacing: self.parent.width / 36
+        MyScrollView:
+            id: scroll
+            do_scroll_x: False
+            do_scroll_y: True
+            scroll_wheel_distance: 60
+            MyMDList:
+                id: playlist_container
+                padding: self.parent.width / 6, 0
+                spacing: self.parent.width / 36
 
 <PlaylistBar>:
     orientation: "horizontal"
@@ -65,6 +67,7 @@
             valign: "top"
             text: "I rabarbari rossi"
             font_style: "Subtitle1"
+            on_size: playlist_bar.update_labels()
         MDLabel:
             id: song_field
             valign: "bottom"
@@ -158,3 +161,45 @@
     MDScrollView:
         MDList:
             id: container
+
+
+<Search>
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(10)
+        padding: dp(20)
+        pos_hint:{'center_x': 0.5, 'y': 0.85}
+
+        BoxLayout:
+            size_hint_y: None
+            height: self.minimum_height
+
+            MDIconButton:
+                icon: 'magnify'
+
+            MDTextField:
+                id: search_field
+                on_text: 
+                    root.set_list(self.text)
+            
+            MDIconButton:
+                on_press: root.cancel()
+                icon: "close"
+                theme_text_color: "Custom"
+                icon_color: "red"
+
+    RecycleView:
+        pos_hint:{'center_x': 0.5, 'center_y': 0.4}
+        MDList:
+            id: container
+
+<SearchListItem>
+    IconLeftWidget:
+        icon: "plus"
+        on_press: root.open_dialog()
+    IconRightWidget:
+        icon: "play"
+        on_press: root.play()
+
+    
+    

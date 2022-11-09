@@ -4,9 +4,9 @@ from kivymd.uix.list import MDList
 from kivy.properties import NumericProperty
 from lib.ui.playlistitem import PlaylistItem
 from kivy.clock import Clock
-from localization import localization
+from lib.platform.datamanager import get_data_manager
 
-loading_element_per_second = 30 # Used to set the 
+loading_element_per_second = 300 # Used to set the 
 '''Number of elements to show per second'''
 
 _set_data_count = 0 #Used to not mix closed in time call to set_data
@@ -40,7 +40,7 @@ class MyMDList(MDList):
     -------
     on_scroll_stop(parent:ScrollView) -> None
         Hide images not visible or show visible ones
-    set_data(data: list[dict["name":str, "image": str, "songs": list[str]]]) -> None
+    set_data(data: list[dict["name":str, "songs": list[str]]]) -> None
         Set the playlists to show. Order them by pinned and name
     '''
 
@@ -65,12 +65,12 @@ class MyMDList(MDList):
                 elif hasattr(child.image, "save_image_tmp") and child.image.save_image_tmp != "":
                     child.image.source = child.image.save_image_tmp
     
-    def set_data(self, data: list[dict["name":str, "image": str, "songs": list[str]]]) -> None:
+    def set_data(self, data: list[dict["name":str, "songs": list[int]]]) -> None:
         '''Show the playlist list. Order them by pinned and name
 
         Attributes
         ----------
-        data : list[dict["name":str, "image": str, "songs": list[str]]]
+        data : list[dict["name":str, "songs": list[int]]]
             The playlist list to show.
 
         Returns
@@ -86,10 +86,10 @@ class MyMDList(MDList):
         
         Clock.schedule_once(lambda _: self.clear_widgets())
         for i, playlist in enumerate(sorted(data, key=self.__key_order)):
-            
+
             # Create function in order to not intersect with
             # the change of playlist during for set_data_count
-            def create_func(pl:dict["name":str, "image": str, "songs": list[str]], set_data:int):
+            def create_func(pl, set_data):
                 def tmp(_):
                     if set_data == _set_data_count:
                         self.add_widget(PlaylistItem(pl))

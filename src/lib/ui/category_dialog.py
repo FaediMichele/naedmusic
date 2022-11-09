@@ -3,7 +3,7 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.uix.list.list import CheckboxLeftWidget
-from localization import localization
+from lib.localization import localization
 from typing import Callable, Any
 
 class CategoryDialog():

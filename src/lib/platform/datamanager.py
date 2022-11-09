@@ -1,6 +1,6 @@
 from kivy.utils import platform
 from kivy.storage.jsonstore import JsonStore
-from localization import localization
+from lib.localization import localization
 from mutagen.easyid3 import EasyID3
 from typing import Any
 import os
@@ -140,38 +140,64 @@ class DataManager():
         
     
 
-    def __create_id3_list(self, files):
+    def __create__list(self, files, music_folder):
         # TODO multithread
-        id3_files = []
+        songs = []
         for f in files:
             try:
-                id3_files.append(EasyID3(f))
+                id3 = EasyID3(f)
+                songs.append({
+                    "title": id3["title"][0],
+                    "album": id3["album"][0],
+                    "artist": id3["artist"][0],
+                    "track": int(id3["tracknumber"][0]),
+                    "file": f
+                })
             except:
-                pass
-        return id3_files
+                def get_track(f):
+                    try:
+                        return int(re.sub(r"^([0-9]*)?\s?[-#.]?\s?(.*)\.(wav|mp3|flac])$", r"\1", f))
+                    except ValueError:
+                        return 0
+
+                def get_artist(music_folder, file):
+                    folder_name = os.path.dirname(file)
+                    while os.path.dirname(folder_name) != music_folder:
+                        folder_name = os.path.dirname(folder_name)
+                    return os.path.basename(folder_name)
+
+                songs.append({
+                    "title": re.sub(r"^([0-9]*)?\s?[-#.]?\s?(.*)\.(wav|mp3|flac])$", r"\2", os.path.basename(f)),
+                    "album": re.sub(r"^^([0-9]*)?\s?[\.#-]?\s?(.*) ((\(*[0-9]{4}\)?))?$", r"\2", os.path.basename(os.path.dirname(f))+ ("" if os.path.basename(os.path.dirname(f)).endswith(")") else " ")),
+                    "artist": get_artist(music_folder, f),
+                    "track": get_track(os.path.basename(f)),
+                    "file": f
+                })
+        songs = sorted(songs, key=lambda song:song["artist"]+song["album"]+str(song["track"])+song["title"])
+        for k, s in enumerate(songs):
+            s["id"] = k
+        return songs
 
     def __build_json(self, music_folder):
         files = self.__traverse_folder(music_folder, re.compile("\.(wav|mp3|flac)$"))        
-        id3_files = self.__create_id3_list(files)
-        artists = self.__filter_by_field(id3_files, "artist", )
-        albums = self.__filter_by_field(id3_files, "album")
+        songs = self.__create__list(files, music_folder)
+
         return {
-            "artist": [{"name": artist, "image": self.get_image(songs), "songs": songs} for artist, songs in artists.items()],
-            "album": [{"name": album, "image": self.get_image(songs), "songs": songs} for album, songs in albums.items()],
-            "playlist": [{"name": localization["favorites"], "image": "", "pinned": True, "songs": []}], 
+            "songs": songs,
+            "artist": self.__filter_by_field(songs, "artist"),
+            "album": self.__filter_by_field(songs, "album"),
+            "playlist": [{"name": localization["favorites"], "pinned": True, "songs": []}], 
         }
 
-    def __filter_by_field(self, id3_files, field):
+    def __filter_by_field(self, songs, field):
+        tuples = [(k, song[field]) for k, song in enumerate(songs)]
         ret = {}
-        for f in id3_files:
-            if field in f.keys():
-                for sub_list in f[field]:
-                    rel_path = os.path.relpath(f.filename, self.base_path)
-                    if sub_list not in ret:
-                        ret[sub_list] = [rel_path]
-                    else:
-                        ret[sub_list].append(rel_path)
-        return ret
+        for t in tuples:
+            if t[1] in ret.keys():
+                ret[t[1]]["songs"].append(t[0])
+            else:
+                ret[t[1]] = {"name": t[1], "songs": [t[0]]}
+        return list(ret.values())
 
 
     def __traverse_folder(self, folder, regex):
