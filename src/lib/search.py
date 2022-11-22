@@ -16,9 +16,7 @@ class Search(Screen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        data_manager = get_data_manager()
         self.ids.search_field.hint_text = localization["search"]["search_field_hint"]
-        self.all_songs = data_manager.store["data"]["songs"]
         self.search_event = None
 
     def pressed(self, value):
@@ -47,6 +45,9 @@ class Search(Screen):
         text = self.ids.search_field.text
         if len(text.replace(" ", "")) > 0:
             self.ids.container.clear_widgets() # refresh list
+            if self.all_songs == None:
+               data_manager = get_data_manager()
+               self.all_songs = data_manager.store["data"]["songs"]
             results = search(self.ids.search_field.text, self.all_songs)
             for value in results:
                 # using casefold() to make the input case insensitve
