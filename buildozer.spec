@@ -1,4 +1,5 @@
 [app]
+# clear && buildozer android adb -- logcat -c &&  buildozer android debug deploy run logcat | grep python
 
 # (str) Title of your application
 title = Naed music

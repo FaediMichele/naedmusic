@@ -138,7 +138,9 @@ class Front(Screen):
         # if return None it require additional time.
         # When the time has passed it call the callback in the kivy thread.
         # So the thread is restarted until it return not None
-        if get_data_manager(callback=self.on_start) is not None:
+        data_manager = get_data_manager(callback=self.on_start)
+        if data_manager is not None:
+            data_manager.check_and_run_update()
             Clock.schedule_once(partial(self.__on_loading_ended))
 
     def __on_loading_ended(self, _):

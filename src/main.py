@@ -2,6 +2,7 @@ from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
 from lib.front import Front
 from lib.search import Search
+from kivy.core.window import Window
 
 class MusicApp(MDApp):
     '''MDApp: entrypoint for the application. Run the application using "run()"
@@ -26,12 +27,20 @@ class MusicApp(MDApp):
         self.theme_cls.primary_hue = "A100"
         self.theme_cls.accent_palette = "Red"
         self.theme_cls.accent_hue = "100"
-        sm = ScreenManager()
+        self.screen_manager = ScreenManager()
         self.front = Front(name="front")
         self.search = Search(name="search")
-        sm.add_widget(self.front)
-        sm.add_widget(self.search)
-        return sm
+        self.screen_manager.add_widget(self.front)
+        self.screen_manager.add_widget(self.search)
+        Window.bind(on_keyboard=self.back_button)
+        return self.screen_manager
+
+    def back_button(self,window,key,*largs):
+        '''Function called when a button is pressed'''
+        if key == 27:
+            if self.screen_manager.current == "search":
+                self.screen_manager.switch_to(self.front, direction="up") #you can create a method here to cache in a list the number of screens and then pop the last visited screen.
+            return True
 
     def on_start(self, **kwargs):
         '''Callback called when the application completed the starting process'''
