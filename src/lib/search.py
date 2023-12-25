@@ -39,6 +39,10 @@ class Search(Screen):
         if self.search_event is not None:
             self.search_event.cancel()
         self.search_event = Clock.schedule_once(lambda _: self.__search(), .8)
+
+    
+    def set_focus_to_search(self):
+        self.ids.search_field.focus = True
         
     
     def __search(self):
@@ -57,6 +61,7 @@ class Search(Screen):
     
     def cancel(self):
         '''Close the screen and return to the front page'''
+        self.ids.container.clear_widgets()
         self.ids.search_field.text = ""
         self.manager.switch_to(MDApp.get_running_app().front, direction="up")
 

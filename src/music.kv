@@ -1,6 +1,49 @@
 #:kivy 1.10.0
 
+
+<DrawerClickableItem@MDNavigationDrawerItem>
+    focus_color: "#e7e4c0"
+    text_color: "#4a4939"
+    icon_color: "#4a4939"
+    ripple_color: "#c5bdd2"
+    selected_color: "#0c6c4d"
+
+
+<DrawerLabelItem@MDNavigationDrawerItem>
+    text_color: "#4a4939"
+    icon_color: "#4a4939"
+    focus_behavior: False
+    selected_color: "#4a4939"
+    _no_ripple_effect: True
+
+<Menu>:
+    radius: (0, 16, 16, 0)
+
+    MDNavigationDrawerMenu:
+
+        DrawerLabelItem:
+            focus_color: "#e7e4c0"
+            text_color: "#4a4939"
+            icon_color: "#4a4939"
+            ripple_color: "#c5bdd2"
+            selected_color: "#0c6c4d"
+            icon: "download"
+            text: "Download the configuration file"
+            on_release: root.download_configuration_file()
+
+        DrawerLabelItem:
+            focus_color: "#e7e4c0"
+            text_color: "#4a4939"
+            icon_color: "#4a4939"
+            ripple_color: "#c5bdd2"
+            selected_color: "#0c6c4d"
+            icon: "publish"
+            text: "Load a configuration file"
+            on_release: root.load_configuration_file()
+
 <Front>:
+
+
     MDBoxLayout:
         id: layout
         topbar: topbar
@@ -12,9 +55,9 @@
         MDTopAppBar:
             id: topbar
             title: "MusicApp"
-            left_action_items: [["magnify",  lambda x: root.search()]]
+            left_action_items: [["menu", lambda x: id_menu.set_state("open")]]
             anchor_title: "center"
-            right_action_items: [["album", lambda x: root.launch_category_dialog()]]
+            right_action_items: [["magnify", lambda x: root.search()], ["album", lambda x: root.launch_category_dialog()]]
 
         MDSpinner:
             id: loading_spinner
@@ -32,6 +75,10 @@
                 id: playlist_container
                 padding: self.parent.width / 6, 0
                 spacing: self.parent.width / 36
+    
+    Menu:
+        id: id_menu
+    
 
 <PlaylistBar>:
     orientation: "horizontal"

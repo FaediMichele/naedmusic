@@ -4,11 +4,13 @@ from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.list import OneLineAvatarIconListItem
+from kivymd.uix.list import OneLineAvatarIconListItem, TwoLineListItem, TwoLineAvatarIconListItem, ThreeLineListItem
 from kivymd.uix.list.list import CheckboxLeftWidget
 from lib.localization import localization
 from lib.platform.datamanager import get_data_manager
 from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import StringProperty
+
 from typing import Callable, Any
 
 class AddToPlaylistDialog():
@@ -89,13 +91,9 @@ class AddToPlaylistDialog():
         if playlist_selected is None:
             self._dialog.buttons[0].opacity = 0
             self._dialog.buttons[0].disabled = True
-            self._dialog.buttons[1].opacity = 0
-            self._dialog.buttons[1].disabled = True
         elif self._last_selected is None:
             self._dialog.buttons[0].opacity = 1
             self._dialog.buttons[0].disabled = False
-            self._dialog.buttons[1].opacity = 1
-            self._dialog.buttons[1].disabled = False
         self._last_selected = playlist_selected
 
     def on_delete_close(self, _):
@@ -128,6 +126,7 @@ class AddToPlaylistDialog():
         self.on_item_selected(None)
         self._delete_dialog.dismiss()
         self.__copy_dialog()
+        self._edit_dialog.dismiss(force=True)
 
     def on_rename_close(self, _):
         '''Callback called when the dialog for renaming a playlist is closed negatively
@@ -150,6 +149,8 @@ class AddToPlaylistDialog():
         self._playlists[self._last_selected]["name"] = self._rename_dialog.content_cls.ids["text_field"].text
         self._items[self._last_selected].text = self._playlists[self._last_selected]["name"]
         self._rename_dialog.dismiss()
+        self._edit_dialog.dismiss()
+
 
     def on_new_close(self, _):
         '''Callback called when the dialog for creating a playlist is closed negatively
@@ -191,7 +192,7 @@ class AddToPlaylistDialog():
         self._delete_dialog.open()
 
     def on_rename(self, _):
-        '''Callback called when the button that open the dialog for deleting a playlist is pressed
+        '''Callback called when the button that open the dialog for renaming a playlist is pressed
         
         Arguments
         ---------
@@ -203,6 +204,21 @@ class AddToPlaylistDialog():
         self._rename_dialog.title = localization["add_to_playlist_dialog"]["rename_ask_title"].format(name=self._playlists[self._last_selected]["name"])
         self._rename_dialog.content_cls.ids["text_field"].text = self._playlists[self._last_selected]["name"]
         self._rename_dialog.open()
+
+    def on_edit(self, _):
+        '''Callback called when the button that open the dialog for editing a playlist is pressed
+        
+        Arguments
+        ---------
+        _ : Any
+            [Unused] The widget that call the method
+        '''
+        if self._last_selected is not None:
+            if self._rename_dialog is None:
+                self.__create_edit_dialog()
+            self._edit_dialog.title = localization["add_to_playlist_dialog"]["edit_ask_title"].format(name=self._playlists[self._last_selected]["name"])
+            self._edit_dialog.open()
+
 
     def on_new(self, _):
         '''Callback called when the button that open the dialog for deleting a playlist is pressed
@@ -233,6 +249,11 @@ class AddToPlaylistDialog():
         data_manager.put_data(["data", "playlist"], self.__calculate_new_playlist_data())
         self._dialog.dismiss()
 
+    
+    def on_edit_cancel(self, _):
+        self._edit_dialog.dismiss()
+
+
 
     def __get_playlist(self, playlist_list):
         def key(x):
@@ -256,7 +277,11 @@ class AddToPlaylistDialog():
 
 
     def __create_dialog(self):
-        self._items = [ItemConfirm(playlist_index=i, text=pl["name"], value=self.song["id"] in pl["songs"], on_selected_item=self.on_item_selected) for i, pl in enumerate(self._playlists)]
+        self._items = [ItemConfirm(playlist_index=i,
+                                   text=pl["name"],
+                                   value=self.song["id"] in pl["songs"],
+                                   on_selected_item=self.on_item_selected)
+                                for i, pl in enumerate(self._playlists)]
         
         self._dialog = MDDialog(
             title=localization["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
@@ -264,18 +289,10 @@ class AddToPlaylistDialog():
             items=self._items,
             buttons=[
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["delete"],
+                    text=localization["add_to_playlist_dialog"]["edit"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
-                    on_release=self.on_delete,
-                    disabled=True,
-                    opacity=0
-                ),
-                MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["rename"],
-                    theme_text_color="Custom",
-                    text_color=MDApp.get_running_app().theme_cls.primary_color,
-                    on_release=self.on_rename,
+                    on_release=self.on_edit,
                     disabled=True,
                     opacity=0
                 ),
@@ -284,12 +301,6 @@ class AddToPlaylistDialog():
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_new
-                ),
-                MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["cancel"],
-                    theme_text_color="Custom",
-                    text_color=MDApp.get_running_app().theme_cls.primary_color,
-                    on_release=self.on_close
                 ),
                 MDFlatButton(
                     text=localization["add_to_playlist_dialog"]["confirm"],
@@ -352,6 +363,32 @@ class AddToPlaylistDialog():
         )
         self._rename_dialog.content_cls.ids["text_field"].hint_text = localization["add_to_playlist_dialog"]["rename_ask_hint"]
 
+    def __create_edit_dialog(self):
+        self._edit_dialog = MDDialog(
+            title=localization["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
+            type="confirmation",
+            items=[
+                OneLineAvatarIconListItem(
+                    text=localization["add_to_playlist_dialog"]["delete_dialog_init"],
+                    # secondary_text=localization["add_to_playlist_dialog"]["delete_2"],
+                    on_release=self.on_delete
+                ),
+                OneLineAvatarIconListItem(
+                    text=localization["add_to_playlist_dialog"]["rename_dialog_init"],
+                    # secondary_text=localization["add_to_playlist_dialog"]["rename_2"],
+                    on_release=self.on_rename
+                )
+            ],
+            buttons=[
+                MDFlatButton(
+                    text=localization["add_to_playlist_dialog"]["edit_cancel"],
+                    theme_text_color="Custom",
+                    text_color=MDApp.get_running_app().theme_cls.primary_color,
+                    on_release=self.on_edit_cancel
+                )
+            ],
+        )
+
     
 
     def __create_new_dialog(self):
@@ -400,6 +437,14 @@ class ItemConfirm(OneLineAvatarIconListItem):
 
     def create_copy(self):
         return ItemConfirm(self.playlist_index, self.ids["check"].active, self._on_selected_item, text=self.text)
-
+    
+class Item(TwoLineListItem):
+    divider = None
+    source = StringProperty()
+    
 class NewRenameDialogContent(BoxLayout):
+    pass
+
+
+class NewEditDialogContent(BoxLayout):
     pass

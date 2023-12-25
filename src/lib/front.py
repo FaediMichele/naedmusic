@@ -63,7 +63,7 @@ class Front(Screen):
             return
         self.loading_spinner = self.ids["loading_spinner"]
         self._previous_state = True
-        t = Thread(target=self.__load_data)
+        t = Thread(target=self.load_data)
         t.daemon = True
         t.start()
 
@@ -129,19 +129,21 @@ class Front(Screen):
             else:
                 self.start_playlist([song])
 
-
     def search(self):
         '''Change the screen to the search one'''
-        self.manager.switch_to(MDApp.get_running_app().search, direction="down")    
+        search = MDApp.get_running_app().search
+        self.manager.switch_to(search, direction="down")
+        search.set_focus_to_search()
 
-    def __load_data(self):
+    def load_data(self):
         # if return None it require additional time.
         # When the time has passed it call the callback in the kivy thread.
         # So the thread is restarted until it return not None
         data_manager = get_data_manager(callback=self.on_start)
         if data_manager is not None:
-            data_manager.check_and_run_update()
             Clock.schedule_once(partial(self.__on_loading_ended))
+            if data_manager.check_and_run_update():
+                Clock.schedule_once(partial(self.__on_loading_ended))
 
     def __on_loading_ended(self, _):
         data_manager = get_data_manager()

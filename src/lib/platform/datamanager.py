@@ -13,7 +13,13 @@ implemented_platoforms = ["Windows", "Android", "Linux"]
 
 __data_manager = None
 
-def get_data_manager(callback=lambda:None):
+
+def reload_data_manager(callback=lambda:None):
+    global __data_manager
+    __data_manager = None
+    return get_data_manager(callback)
+
+def get_data_manager(callback=lambda dm:None):
     '''Get the data manager. The first time ever the program is runned on a system may require time to calculate
     
     Arguments
@@ -95,7 +101,6 @@ class DataManager():
             self.store.put("data", **new_data)
             self.store.put("config", **{"base_path": base_path, "shuffle": True, "last_category": "artist"})
             logging.info(f"Data Saved in {data_file_name}")
-
     
     def put_data(self, path:list[str], value: Any):
         '''Save the data in the file following a path. eg. store["field1"]["field2"]["field3"] = value <=> put_fata(["field1", "field2", "field3"], value)
@@ -142,11 +147,16 @@ class DataManager():
         logging.info(f"Removed songs {removed_songs}")
         logging.info(f"Added songs {new_songs}")
 
+        changes = False
+
         if len(removed_songs) > 0:
             self.__remove_songs(removed_songs)
+            changes = True
 
         if len(new_songs) > 0:
             self.__add_songs(new_songs)
+            changes = True
+        return changes
 
     def __remove_songs(self, files):
         for file in files:

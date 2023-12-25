@@ -1,6 +1,7 @@
-kivy[base,media,tuio]
-kivymd == 1.1.1
+kivy[base,media,tuio,sdl2,full]
+kivymd
 pillow
 mutagen
-sdl2_ttf == 2.0.15
 ffpyplayer
+cython==0.29.33
+buildozer

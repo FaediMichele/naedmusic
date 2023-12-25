@@ -86,7 +86,7 @@ class Playlist():
     def next(self) -> None:
         '''Play the next song. If the playlist reached the end it shuffle tha playlist and set index to 0.'''
         if len(self.added_songs) > 0:
-            self.next_song =self.added_songs[0]
+            self.next_song = self.added_songs[0]
             self.added_songs = self.added_songs[1:]
             ok, err = self.__play()
             if not ok:

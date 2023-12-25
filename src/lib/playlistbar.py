@@ -10,7 +10,12 @@ from lib.localization import localization
 from datetime import date
 from lib.util import show_snackbar, truncate_text
 from kivy.clock import Clock
+from kivy.logger import Logger
 from lib.playlist import Playlist
+
+from kivy.utils import platform
+if platform == 'android':
+    from android.broadcast import BroadcastReceiver
 
 random.seed(date.today().month*100 + date.today().day)
 
@@ -76,6 +81,13 @@ class PlaylistBar(MDBoxLayout):
         self.next_song.bind(on_press=lambda _: self.playlist.next())
         self.shuffle_playlist.bind(on_press=lambda _: self.__on_shuffle())
         self.add_song_to.bind(on_press=lambda _: self.__on_added_to_playlist())
+
+        if platform == 'android':
+            self.br = BroadcastReceiver(self.on_call_state_changed, ['headset_plug'])
+            self.br.start()
+
+    def on_call_state_changed(self, content, intent):
+        Logger.debug(f"extras: {dir(intent)}")
     
     def update_labels(self):
         '''Update the labels to the current playing song. Must be called in the kivy thread'''
@@ -98,6 +110,7 @@ class PlaylistBar(MDBoxLayout):
 
         if get_data_manager().store["config"]["shuffle"]:
             self.playlist.shuffle()
+        self.pause_song.icon = "pause"
 
     def play(self):
         '''Run the playlist'''

@@ -30,7 +30,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 0.1
+version = 0.2
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -38,7 +38,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,pillow,kivymd==1.0.1,mutagen,sdl2_ttf==2.0.15,ffpyplayer,nltk,regex
+requirements = python3,kivy,pillow,kivymd==1.0.1,mutagen,ffpyplayer,nltk,regex,plyer
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -94,7 +94,7 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,READ_PHONE_STATE
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -176,7 +176,7 @@ android.private_storage = True
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-#android.add_src =
+android.add_src = java_src
 
 # (list) Android AAR archives to add
 #android.add_aars =
@@ -229,7 +229,7 @@ android.private_storage = True
 #android.res_xml = PATH_TO_FILE,
 
 # (str) launchMode to set for the main activity
-#android.manifest.launch_mode = standard
+android.manifest.launch_mode = singleTask
 
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
