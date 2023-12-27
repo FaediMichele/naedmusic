@@ -76,8 +76,8 @@ class PlaylistBar(MDBoxLayout):
         super().__init__()
         self.pause_song.bind(on_press=lambda _: self.play_pause())
         self.next_song.bind(on_press=self.on_next_pressed)
-        self.shuffle_playlist.bind(on_press=self.__on_shuffle)
-        self.add_song_to.bind(on_press=self.__on_added_to_playlist)
+        self.shuffle_playlist.bind(on_press=self._on_shuffle)
+        self.add_song_to.bind(on_press=self._on_added_to_playlist)
     
     def update_labels(self):
         '''Update the labels to the current playing song. Must be called in the kivy thread'''
@@ -128,11 +128,11 @@ class PlaylistBar(MDBoxLayout):
         else:
             self.pause_song.icon = "play"
 
-    def __on_shuffle(self, _):
+    def _on_shuffle(self, _):
         self.playlist.shuffle()
         self.playlist.next()
 
-    def __on_added_to_playlist(self, _):
+    def _on_added_to_playlist(self, _):
         data_manager = get_data_manager()
         def update_view():
             if data_manager.store["config"]["last_category"] == "playlist":

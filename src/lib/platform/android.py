@@ -22,7 +22,6 @@ TelephonyManager = autoclass('android.telephony.TelephonyManager')
 Consumer = autoclass('java.util.function.Consumer')
 
 MyBroadcastReceiver = autoclass('org.test.naedmusic.MyBroadcastReceiver')
-MyUtil = autoclass('org.test.naedmusic.MyUtil')
 
 
 class MyBiFunction(PythonJavaClass):
@@ -220,9 +219,8 @@ class AndroidAudioPlayer(AudioPlayer):
         self._complete_callback = AudioCompletionCallback(self.__on_song_end)
         self.mplayer.setOnCompletionListener(self._complete_callback)
         
-        currentActivity = cast('android.app.Activity', PythonActivity.mActivity)
-        context = cast('android.content.Context', currentActivity.getApplicationContext())
-        self.br = MyBroadcastReceiver(context, ['android.intent.action.HEADSET_PLUG', 'android.intent.action.PHONE_STATE'], lambda c,i: self.__on_broadcast(c,i))
+        
+        self.br = MyBroadcastReceiver(PythonActivity.mActivity.getApplicationContext(), ['android.intent.action.HEADSET_PLUG', 'android.intent.action.PHONE_STATE'], lambda c,i: self.__on_broadcast(c,i))
         self.br.Start()
 
     def playpause_sound(self):
