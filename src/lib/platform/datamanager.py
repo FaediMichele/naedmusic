@@ -5,7 +5,7 @@ from mutagen.easyid3 import EasyID3
 from typing import Any
 import os
 import re
-import logging
+from kivy.logger import Logger
 
 
 implemented_platoforms = ["Windows", "Android", "Linux"]
@@ -46,6 +46,7 @@ def get_data_manager(callback=lambda dm:None):
             __data_manager = windows.WindowsDataManager()
         elif platform == "android":
             def my_callback(status):
+                Logger.debug("DATA MANAGER STATUS: " + str(status))
                 if status:
                     global __data_manager
                     __data_manager = android.AndroidDataManager()
@@ -100,7 +101,7 @@ class DataManager():
             new_data = self.__build_json(self.base_path)
             self.store.put("data", **new_data)
             self.store.put("config", **{"base_path": base_path, "shuffle": True, "last_category": "artist"})
-            logging.info(f"Data Saved in {data_file_name}")
+            Logger.info(f"Data Saved in {data_file_name}")
     
     def put_data(self, path:list[str], value: Any):
         '''Save the data in the file following a path. eg. store["field1"]["field2"]["field3"] = value <=> put_fata(["field1", "field2", "field3"], value)
@@ -113,7 +114,7 @@ class DataManager():
             Value to save
         '''
         self.store[path[0]] = self.__put_data_rec(self.store[path[0]], path[1:], value)
-        logging.info(f"Data updated: {path}")
+        Logger.info(f"Data updated: {path}")
 
     def get_image(self, songs: list[str]) -> str:
         '''Search an image in a list of songs. Search for an image in the same folder of the songs.
@@ -144,8 +145,8 @@ class DataManager():
         removed_songs = old_songs - all_songs
         new_songs = all_songs - old_songs
 
-        logging.info(f"Removed songs {removed_songs}")
-        logging.info(f"Added songs {new_songs}")
+        Logger.info(f"Removed songs {removed_songs}")
+        Logger.info(f"Added songs {new_songs}")
 
         changes = False
 
@@ -173,13 +174,16 @@ class DataManager():
                             if len(el["songs"]) == 0:
                                 del self.store["data"][cateogry][i]
                             i+=1
-                    logging.info(f"Removed {song['title']}")
+                    Logger.info(f"Removed {song['title']}")
                     break
         self.store["data"] = self.store["data"]
 
     def __add_songs(self, files):
         songs = self.__create__list(files, self.base_path)
-        previous_last_id = max([s["id"] for s in self.store["data"]["songs"]])
+        if len(self.store["data"]["songs"]) == 0:
+            previous_last_id = 0
+        else:
+            previous_last_id = max([s["id"] for s in self.store["data"]["songs"]])
         for s in songs:
             s["id"] += previous_last_id + 1
 
@@ -192,9 +196,9 @@ class DataManager():
                     if el["name"] == s[cateogry]:
                         el["songs"].append(s["id"])
                         ok = False
-                        logging.info(f"Added {s['title']} to {cateogry}")
+                        Logger.info(f"Added {s['title']} to {cateogry}")
                 if ok:
-                    logging.info(f"Added new category({cateogry} - {s[cateogry]}) with: {s['title']}")
+                    Logger.info(f"Added new category({cateogry} - {s[cateogry]}) with: {s['title']}")
                     self.store["data"][cateogry].append({
                             "name": s[cateogry], "songs": [s["id"]]
                         })

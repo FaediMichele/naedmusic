@@ -21,7 +21,7 @@ class LinuxDataManager(DataManager):
 class LinuxAudioPlayer(AudioPlayer):
     '''AudioPlayer for Linux OSs. Wrapper of kivy.core.audio.SoundLoader'''
     
-    def __init__(self, on_song_end=lambda:None, **kwargs):
+    def __init__(self, on_song_end=lambda:None, on_state_changed=lambda state:None, **kwargs):
         '''Create new LinuxAudioPlayer
         
         Arguments
@@ -29,7 +29,7 @@ class LinuxAudioPlayer(AudioPlayer):
         on_song_end : () -> None
             Callback called when the song ends
         '''
-        super().__init__(on_song_end, **kwargs)
+        super().__init__(on_song_end, on_state_changed=lambda state:None, **kwargs)
         self.sound = None
         self.state = False
 

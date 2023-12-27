@@ -13,6 +13,7 @@ from kivy.clock import Clock
 from functools import partial
 from lib.util import show_snackbar
 from kivymd.app import MDApp
+from kivy.logger import Logger
 
 class Front(Screen):
     '''Front screen that contains the main page of the app.

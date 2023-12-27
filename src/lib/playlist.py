@@ -6,6 +6,8 @@ from lib.platform.audioplayer import get_audio_player, AudioPlayer
 from lib.platform.datamanager import get_data_manager
 from lib.ui.add_to_playlist_dialog import AddToPlaylistDialog
 from lib.localization import localization
+from kivy.logger import Logger
+
 import os
 from datetime import date
 from lib.util import show_snackbar, truncate_text
@@ -44,12 +46,15 @@ class Playlist():
     next_song = None
     '''Next song to play. Can be a song of the songs list or of the added_song list'''
 
-    def __init__(self, songs: list[dict["title": str, "album": str, "artist": str, "file": str, "track": int, "id": int]], on_song_changed: Callable[[],None]):
+    def __init__(self,
+                 songs: list[dict["title": str, "album": str, "artist": str, "file": str, "track": int, "id": int]],
+                 on_song_changed: Callable[[],None],
+                 on_state_changed: Callable[[bool],None]):
         super().__init__()
         self.player = get_audio_player()
         self.player.on_song_end = lambda _: self.next()
+        self.player.on_state_changed = on_state_changed
         self.playlist = songs
-        self.__play()
         self.on_song_changed = on_song_changed
 
 
@@ -97,12 +102,14 @@ class Playlist():
             if self.index == len(self.playlist) - 1:
                 self.shuffle()
             self.index = (self.index + 1) % len(self.playlist)
+            
             ok, err = self.__play()
             # Sometimes does no load songs
             if not ok:
-                show_snackbar(localization["errors"]["opening_sound"].format(self.current_song["title"], err))
+                Logger.info(localization["errors"]["opening_sound"].format(song=self.current_song["title"], msg=err))
+                show_snackbar(localization["errors"]["opening_sound"].format(song=self.current_song["title"], msg=err))
                 self.next()
-    
+
     def start(self):
         '''Start the playlist'''
         self.index = -1

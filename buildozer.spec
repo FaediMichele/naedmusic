@@ -94,13 +94,13 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,READ_PHONE_STATE
+android.permissions = INTERNET, READ_PHONE_STATE, READ_MEDIA_AUDIO,  READ_MEDIA_IMAGES
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
 
 # (int) Target Android API, should be as high as possible.
-#android.api = 27
+android.api = 34
 
 # (int) Minimum API your APK / AAB will support.
 #android.minapi = 21
@@ -188,12 +188,12 @@ android.add_src = java_src
 #android.add_assets =
 
 # (list) Gradle dependencies to add
-#android.gradle_dependencies =
+android.gradle_dependencies = androidx.core:core:1.12.0, androidx.core:core-role:1.0.0, androidx.core:core-animation:1.0.0-rc01
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
 # android.enable_androidx requires android.api >= 28
-#android.enable_androidx = False
+android.enable_androidx = True
 
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
@@ -229,7 +229,7 @@ android.add_src = java_src
 #android.res_xml = PATH_TO_FILE,
 
 # (str) launchMode to set for the main activity
-android.manifest.launch_mode = singleTask
+android.manifest.launch_mode = singleTop
 
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so

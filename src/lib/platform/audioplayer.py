@@ -24,9 +24,10 @@ class AudioPlayer(ABC):
     on_song_end = None
     state = False
 
-    def __init__(self, on_song_end=lambda:None, **kwargs):
+    def __init__(self, on_song_end=lambda x: None, on_state_changed=lambda state:None, **kwargs):
         super(AudioPlayer, self).__init__()
         self.on_song_end = on_song_end
+        self.on_state_changed = on_state_changed
 
     @abstractmethod
     def close_sound(self):

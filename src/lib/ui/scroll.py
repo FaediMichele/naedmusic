@@ -85,6 +85,8 @@ class MyMDList(MDList):
         _set_data_count += 1
         
         Clock.schedule_once(lambda _: self.clear_widgets())
+        if len(data) == 0:
+            return 1 / loading_element_per_second
         for i, playlist in enumerate(sorted(data, key=self.__key_order)):
 
             # Create function in order to not intersect with

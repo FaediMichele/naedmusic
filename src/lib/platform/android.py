@@ -5,19 +5,38 @@ from kivy.clock import Clock
 from typing import Callable
 from android.storage import primary_external_storage_path # type: ignore
 from android.permissions import request_permissions, Permission, check_permission # type: ignore
-from jnius import autoclass, PythonJavaClass, java_method
+from jnius import autoclass, PythonJavaClass, java_method, cast
 from kivy.logger import Logger
 from android import activity as AndroidActivity
+import threading
 
-perms = [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_PHONE_STATE]
+from kivy.utils import platform
 
+perms = [Permission.INTERNET, Permission.READ_PHONE_STATE, Permission.READ_MEDIA_AUDIO,  Permission.READ_MEDIA_IMAGES, ]
+
+MediaPlayer = autoclass('android.media.MediaPlayer')
 Intent = autoclass('android.content.Intent')
 PythonActivity = autoclass('org.kivy.android.PythonActivity')
-Context = autoclass('android.content.Context')
-IntentFilter = autoclass('android.content.IntentFilter')
-MediaPlayer = autoclass('android.media.MediaPlayer')
-PythonActivity = autoclass('org.kivy.android.PythonActivity')
+Application = autoclass('android.app.Application')
+TelephonyManager = autoclass('android.telephony.TelephonyManager')
+Consumer = autoclass('java.util.function.Consumer')
 
+MyBroadcastReceiver = autoclass('org.test.naedmusic.MyBroadcastReceiver')
+MyUtil = autoclass('org.test.naedmusic.MyUtil')
+
+
+class MyBiFunction(PythonJavaClass):
+    __javainterfaces__ = (
+        'java.util.function.Consumer', )
+
+    def __init__(self, callback):
+        super(MyBiFunction, self).__init__()
+        self.callback = callback
+
+    @java_method('(Ljava/lang/Object;)V')
+    def accept(self, container):
+
+        self.callback(container.context, container.intent)
 
 def save_external_file(filename, content):
     currentActivity = PythonActivity.mActivity
@@ -119,6 +138,7 @@ class AndroidDataManager(DataManager):
             Called when the permission is granted. Pass the result of asking the permissions
         '''
         global perms
+
         Clock.schedule_once(lambda _: request_permissions(perms, lambda _, results: callback(False not in results)))
 
     @staticmethod
@@ -143,7 +163,7 @@ class AndroidAudioPlayer(AudioPlayer):
     '''AudioPlayer for Android. Use android.media.MediaPlayer'''
 
     mplayer = None
-    def __init__(self, on_song_end=lambda:None, **kwargs):
+    def __init__(self, on_song_end=lambda:None, on_state_changed=lambda state:None, **kwargs):
         '''Create a new AndroidAudioPlayer
         
         Arguments
@@ -151,10 +171,13 @@ class AndroidAudioPlayer(AudioPlayer):
         on_song_end : () -> None
             Callback called when the song ends
         '''
-        super().__init__(on_song_end, **kwargs)
+        super().__init__(on_song_end, on_state_changed=lambda state:None, **kwargs)
 
         self.length = 0
         self.state = False
+        self.headset_plug_state = -1
+        self.stopped_by_call = False
+        self.stopped_by_plug = False
 
 
 
@@ -165,6 +188,8 @@ class AndroidAudioPlayer(AudioPlayer):
             self.mplayer.stop()
             self.mplayer.reset()
             self.mplayer = None
+            self.br.Stop()
+            self.br = None
 
     def open_sound(self, path:str):
         '''Load the song and start to play it
@@ -194,17 +219,66 @@ class AndroidAudioPlayer(AudioPlayer):
 
         self._complete_callback = AudioCompletionCallback(self.__on_song_end)
         self.mplayer.setOnCompletionListener(self._complete_callback)
-
+        
+        currentActivity = cast('android.app.Activity', PythonActivity.mActivity)
+        context = cast('android.content.Context', currentActivity.getApplicationContext())
+        self.br = MyBroadcastReceiver(context, ['android.intent.action.HEADSET_PLUG', 'android.intent.action.PHONE_STATE'], lambda c,i: self.__on_broadcast(c,i))
+        self.br.Start()
 
     def playpause_sound(self):
         '''Change the status of the reprodution between play and pause'''
         if self.state:
             self.mplayer.pause()
+            self.br.Stop()
         else:
             self.mplayer.start()
+            self.br.Start()
         self.state = not self.state
 
+    
+    def __on_broadcast(self, context, intent):
+        Logger.info(f"Action: {intent.getAction()}")
+
+        if intent.getAction() == 'android.intent.action.HEADSET_PLUG':
+            self.__on_headset_plug(context, intent)
+        elif intent.getAction() == 'android.intent.action.PHONE_STATE':
+            self.__on_phone_state(context, intent)
+
+    def __on_phone_state(self, context, intent):
+        state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
+        Logger.info(f"phone state changed: {state}")
+
+        if state == TelephonyManager.EXTRA_STATE_IDLE and self.stopped_by_call:
+            self.mplayer.start()
+            self.stopped_by_call = False
+            self.on_state_changed(True)
+            Logger.info(f"Sound reasumed after call")
+        if (state == TelephonyManager.EXTRA_STATE_RINGING or state == TelephonyManager.CALL_STATE_OFFHOOK) and self.state:
+            self.mplayer.pause()
+            self.stopped_by_call = True
+            self.on_state_changed(False)
+            Logger.info(f"Sound stopped by call")
+
+
+    def __on_headset_plug(self, context, intent):
+        state = int(intent.getIntExtra("state", -1))
+        
+        if self.headset_plug_state == 1 and state == 0:
+            self.mplayer.pause()
+            self.stopped_by_plug = True
+            Logger.info('Headset plug removed. Song paused')
+
+        if self.headset_plug_state == 0 and state == 1 and self.stopped_by_plug:
+            self.mplayer.start()
+            self.stopped_by_plug = False
+            Logger.info('Headset plug removed. Song paused')
+        self.headset_plug_state = state
+            
+
+        Logger.info(f"State - {state}, previous state: {self.headset_plug_state}")
+
     def __on_song_end(self, mp):
+        Logger.info("__on_song_end  ")
         self.state = False
         self.on_song_end(mp)
         
