@@ -53,7 +53,11 @@ __languages = [
             "opening_sound": "Error reading {song} and cannot be played. Message: {msg}.",
             "asking_permissions": "Permissions to use memory not granted. The application will not load the songs!"
         },
-        "favorites": "Favorites"
+        "favorites": "Favorites",
+        "notification": {
+            "notification_channel_name": "Playlist notification",
+            "notification_channel_desc": "The notification that shows the current playing song, is possible to pause and skip a song"
+        }
     }},
     {"names": ["it_IT"], "value": {
         "filechooser":{

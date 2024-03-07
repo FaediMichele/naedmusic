@@ -7,7 +7,7 @@ from lib.localization import localization
 from kivymd.app import MDApp
 
 from lib.platform.datamanager import get_data_manager, reload_data_manager
-from lib.platform.android import save_external_file, load_external_file
+from lib.platform.android.util import save_external_file, load_external_file
 
 import os
 import json

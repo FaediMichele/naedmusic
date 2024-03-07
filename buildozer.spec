@@ -17,7 +17,7 @@ source.dir = ./src
 source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,images/*.png
+#source.include_patterns = assets/*,images/*.png,images/*.jpg
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -30,7 +30,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 0.2
+version = 0.3
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -45,10 +45,10 @@ requirements = python3,kivy,pillow,kivymd==1.0.1,mutagen,ffpyplayer,nltk,regex,p
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/data/gelbe_Note.png
+presplash.filename = %(source.dir)s/assets/gelbe_Note.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/data/gelbe_Note.png
+icon.filename = %(source.dir)s/assets/gelbe_Note.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -94,7 +94,7 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = INTERNET, READ_PHONE_STATE, READ_MEDIA_AUDIO,  READ_MEDIA_IMAGES
+android.permissions = INTERNET, READ_PHONE_STATE, READ_MEDIA_AUDIO,  READ_MEDIA_IMAGES, POST_NOTIFICATIONS, FOREGROUND_SERVICE, FOREGROUND_SERVICE_MEDIA_PLAYBACK
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -146,7 +146,8 @@ android.private_storage = True
 
 # (str) Extra xml to write directly inside the <manifest> element of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML code
-#android.extra_manifest_xml = ./src/android/extra_manifest.xml
+#android.extra_manifest_xml = ./src/extra_manifest.xml
+
 
 # (str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML arguments:
@@ -188,7 +189,7 @@ android.add_src = java_src
 #android.add_assets =
 
 # (list) Gradle dependencies to add
-android.gradle_dependencies = androidx.core:core:1.12.0, androidx.core:core-role:1.0.0, androidx.core:core-animation:1.0.0-rc01
+android.gradle_dependencies = androidx.activity:activity:1.2.0, androidx.fragment:fragment:1.3.0, androidx.core:core:1.12.0, androidx.core:core-role:1.0.0, androidx.core:core-animation:1.0.0-rc01, androidx.media3:media3-exoplayer:1.3.0, androidx.media3:media3-ui:1.3.0, androidx.media3:media3-ui-leanback:1.3.0, androidx.media3:media3-session:1.3.0, androidx.media3:media3-container:1.3.0, androidx.media3:media3-database:1.3.0, androidx.media3:media3-decoder:1.3.0, androidx.media3:media3-datasource:1.3.0, androidx.media3:media3-common:1.3.0
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.

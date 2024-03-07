@@ -2,6 +2,7 @@ from kivy.utils import platform
 from kivy.storage.jsonstore import JsonStore
 from lib.localization import localization
 from mutagen.easyid3 import EasyID3
+from plyer import filechooser
 from typing import Any
 import os
 import re
@@ -42,23 +43,23 @@ def get_data_manager(callback=lambda dm:None):
     global __data_manager
     if __data_manager is None:
         if platform == "win":
-            import lib.platform.windows as windows
-            __data_manager = windows.WindowsDataManager()
+            from lib.platform.windows.data_manager import WindowsDataManager
+            __data_manager = WindowsDataManager()
         elif platform == "android":
+            from lib.platform.android.data_manager import AndroidDataManager
             def my_callback(status):
-                Logger.debug("DATA MANAGER STATUS: " + str(status))
                 if status:
                     global __data_manager
-                    __data_manager = android.AndroidDataManager()
+                    __data_manager = AndroidDataManager()
                 callback(status)
-            import lib.platform.android as android
-            if not android.AndroidDataManager.check_permissions():
-                android.AndroidDataManager.ask_permissions(my_callback)
+            
+            if not AndroidDataManager.check_permissions():
+                AndroidDataManager.ask_permissions(my_callback)
                 return None
-            __data_manager = android.AndroidDataManager()
+            __data_manager = AndroidDataManager()
         elif platform == "linux":
-            import lib.platform.linux as linux
-            __data_manager = linux.LinuxDataManager()
+            from lib.platform.linux.data_manager import LinuxDataManager
+            __data_manager = LinuxDataManager()
         else:
             raise Exception(f"Platoform not recognized({platform}). Implemented platforms: {implemented_platoforms}")
     return __data_manager

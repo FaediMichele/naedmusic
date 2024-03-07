@@ -28,13 +28,14 @@ class AudioPlayer(ABC):
         super(AudioPlayer, self).__init__()
         self.on_song_end = on_song_end
         self.on_state_changed = on_state_changed
+        self.kwargs = kwargs
 
     @abstractmethod
     def close_sound(self):
         pass
 
     @abstractmethod
-    def open_sound(self, path: str):
+    def open_sound(self, path: str, song: dict):
         pass
 
     @abstractmethod
@@ -55,13 +56,13 @@ def get_audio_player() -> AudioPlayer:
         instance of AudioPlayer for the current platform
     '''
     if operative_system == "win":
-        import lib.platform.windows as windows
-        return windows.WindowsAudioPlayer()
+        from lib.platform.windows.audio_player import WindowsAudioPlayer
+        return WindowsAudioPlayer()
     elif operative_system == "android":
-        import lib.platform.android as android
-        return android.AndroidAudioPlayer()
+        from lib.platform.android.audio_player import AndroidAudioPlayer
+        return AndroidAudioPlayer()
     elif operative_system == "linux":
-        import lib.platform.linux as linux
-        return linux.LinuxAudioPlayer()
+        from lib.platform.linux.audio_player import LinuxAudioPlayer
+        return LinuxAudioPlayer()
     else:
         raise Exception(f"Platoform not recognized({operative_system}). Implemented platforms: {implemented_platoforms}")

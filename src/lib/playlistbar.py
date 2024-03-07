@@ -10,7 +10,7 @@ from datetime import date
 from lib.util import show_snackbar, truncate_text
 from kivy.clock import Clock
 from kivy.logger import Logger
-from lib.playlist import Playlist
+from lib.platform.playlist_manager import get_playlist_manager, Playlist
 
 from kivy.utils import platform
 
@@ -82,9 +82,14 @@ class PlaylistBar(MDBoxLayout):
     def update_labels(self):
         '''Update the labels to the current playing song. Must be called in the kivy thread'''
         data_manager = get_data_manager()
-        self.image.source = data_manager.get_image([self.playlist.current_song["file"]])
-        self.song_name.text = truncate_text(self.playlist.current_song["title"], 2, 15, self.song_name.size[0])
-        self.song_field.text = truncate_text(self.playlist.current_song["album"], 1, 15, self.song_field.size[0])
+        def wait_for_song(song):
+            if song is not None:
+                self.image.source = data_manager.get_image([song["file"]])
+                self.song_name.text = truncate_text(song["title"], 2, 15, self.song_name.size[0])
+                self.song_field.text = truncate_text(song["album"], 1, 15, self.song_field.size[0])
+
+        self.playlist.get_current_song(wait_for_song)
+        
 
     def select_playlist(self, data: list[dict["title": str, "album": str, "artist": str, "file": str, "track": int, "id": int]]) -> None: 
         '''Select the playlist to play. It creates a copy of it in order to shuffle it without side effects and close the previous song.
@@ -96,7 +101,8 @@ class PlaylistBar(MDBoxLayout):
         '''
         if self.playlist is not None:
             self.playlist.close()
-        self.playlist = Playlist(data, on_song_changed=lambda: self.update_labels(), on_state_changed=self.set_icon)
+        self.playlist = get_playlist_manager()
+        self.playlist.new_playlist(data, on_song_changed=lambda song: self.update_labels(), on_state_changed=self.set_icon)
 
         if get_data_manager().store["config"]["shuffle"]:
             self.playlist.shuffle()
@@ -115,11 +121,12 @@ class PlaylistBar(MDBoxLayout):
             The desired state of the player. True if play, False for pause        
         '''
         self.playlist.play_pause(state)
-        self.set_icon(self.playlist.player.state)
+        self.playlist.get_state(lambda state: self.set_icon(state))
+        
 
     def on_next_pressed(self, _):
         self.playlist.next()
-        self.set_icon(self.playlist.player.state)
+        self.playlist.get_state(lambda state: self.set_icon(state))
         
 
     def set_icon(self, state) -> None:
@@ -137,5 +144,8 @@ class PlaylistBar(MDBoxLayout):
         def update_view():
             if data_manager.store["config"]["last_category"] == "playlist":
                 MDApp.get_running_app().front.set_category("playlist", force_reload=True)
+            
+        self.playlist.get_current_song(lambda song: AddToPlaylistDialog(song["id"], on_dialog_ended=update_view).show_dialog())
 
-        AddToPlaylistDialog(self.playlist.current_song["id"], on_dialog_ended=update_view).show_dialog()
+
+        
