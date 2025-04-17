@@ -2,19 +2,19 @@ import os
 import random
 
 from kivy.utils import platform
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from kivy.logger import Logger
 from lib.platform.audioplayer import get_audio_player, AudioPlayer
 from lib.platform.datamanager import get_data_manager
-from lib.localization import localization
 from kivy.logger import Logger
 from datetime import date
 from lib.util import show_snackbar
 from kivy.clock import Clock
 from typing import Callable
 
-random.seed(date.today().month * 100 + date.today().day)
-
+random_seed = date.today().month * 100 + date.today().day
+random.seed(random_seed)
+rng = random.Random(random_seed)
 
 implemented_platoforms = ["Windows", "Android", "Linux"]
 '''Implemented platorms'''
@@ -165,7 +165,7 @@ class Playlist():
             self.added_songs = self.added_songs[1:]
             ok, err = self.__play()
             if not ok:
-                show_snackbar(localization["errors"]["opening_sound"].format(self.current_song["title"], err))
+                show_snackbar(get_localization()["errors"]["opening_sound"].format(self.current_song["title"], err))
                 self.next()
         else:
             
@@ -176,8 +176,8 @@ class Playlist():
             ok, err = self.__play()
             # Sometimes does no load songs
             if not ok:
-                Logger.info(localization["errors"]["opening_sound"].format(song=self.current_song["title"], msg=err))
-                show_snackbar(localization["errors"]["opening_sound"].format(song=self.current_song["title"], msg=err))
+                Logger.info(get_localization()["errors"]["opening_sound"].format(song=self.current_song["title"], msg=err))
+                show_snackbar(get_localization()["errors"]["opening_sound"].format(song=self.current_song["title"], msg=err))
                 self.next()
                 
 
@@ -185,7 +185,7 @@ class Playlist():
         '''Shuffle tha playlist without resetting the current song or index'''
         for _ in range(19):
             self.playlist = [*self.playlist[1::2], *self.playlist[0::2]]
-            random.shuffle(self.playlist, lambda: random.random())
+            rng.shuffle(self.playlist)
         
     def close(self) -> None:
         '''Close the player. It does not reset index'''

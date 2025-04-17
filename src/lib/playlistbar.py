@@ -1,18 +1,19 @@
-import random
 from kivy.properties import ObjectProperty
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.snackbar import Snackbar
-from lib.platform.datamanager import get_data_manager
-from lib.ui.add_to_playlist_dialog import AddToPlaylistDialog
 from kivymd.app import MDApp
-from lib.localization import localization
-from datetime import date
-from lib.util import show_snackbar, truncate_text
 from kivy.clock import Clock
 from kivy.logger import Logger
-from lib.platform.playlist_manager import get_playlist_manager, Playlist
-
 from kivy.utils import platform
+
+import traceback
+from datetime import date
+import random
+
+from lib.platform.datamanager import get_data_manager
+from lib.ui.add_to_playlist_dialog import AddToPlaylistDialog
+from lib.util import show_snackbar, truncate_text
+from lib.platform.playlist_manager import get_playlist_manager, Playlist
+from lib.platform.localization import get_localization
 
 random.seed(date.today().month*100 + date.today().day)
 
@@ -101,11 +102,19 @@ class PlaylistBar(MDBoxLayout):
         '''
         if self.playlist is not None:
             self.playlist.close()
-        self.playlist = get_playlist_manager()
-        self.playlist.new_playlist(data, on_song_changed=lambda song: self.update_labels(), on_state_changed=self.set_icon)
+            
+        try:
+            self.playlist = get_playlist_manager()
+            self.playlist.new_playlist(data, on_song_changed=lambda song: self.update_labels(), on_state_changed=self.set_icon)
+            if get_data_manager().store["config"]["shuffle"]:
+                self.playlist.shuffle()
+        except Exception as e:
+            error_msg = get_localization()["playlist_error"].format(msg=str(e) + '\n\n' + traceback.format_exc())
+            print(error_msg)
+            Logger.error(error_msg)
+            show_snackbar(error_msg)
+            raise e
 
-        if get_data_manager().store["config"]["shuffle"]:
-            self.playlist.shuffle()
         self.pause_song.icon = "pause"
 
     def play(self):
@@ -142,7 +151,7 @@ class PlaylistBar(MDBoxLayout):
     def _on_added_to_playlist(self, _):
         data_manager = get_data_manager()
         def update_view():
-            if data_manager.store["config"]["last_category"] == "playlist":
+            if data_manager.store["config"]["last_data"]["last_category"] == "playlist":
                 MDApp.get_running_app().front.set_category("playlist", force_reload=True)
             
         self.playlist.get_current_song(lambda song: AddToPlaylistDialog(song["id"], on_dialog_ended=update_view).show_dialog())

@@ -7,7 +7,7 @@ import lib.ui.scroll # type: ignore
 from lib.platform.datamanager import get_data_manager
 from lib.ui.category_dialog import CategoryDialog
 from lib.playlistbar import PlaylistBar
-from lib.localization import localization
+from lib.platform.localization import get_localization
 import logging
 from kivy.clock import Clock
 from functools import partial
@@ -57,7 +57,7 @@ class Front(Screen):
         '''
         if not status:
             def no_permission(_):
-                show_snackbar(localization["errors"]["asking_permissions"])
+                show_snackbar(get_localization()["errors"]["asking_permissions"])
                 self.__set_loading_state(False)
                 self.broken_state = True
             Clock.schedule_once(no_permission)
@@ -97,8 +97,8 @@ class Front(Screen):
         '''
         if not self.broken_state:
             data_manager = get_data_manager()
-            if force_reload or selected_category != data_manager.store["config"]["last_category"]:
-                self.ids["topbar"].title = self.__localize_category(selected_category)
+            if force_reload or selected_category != data_manager.store["config"]["last_data"]["last_category"]:
+                self.ids["topbar"].title = get_localization()['category_names'][selected_category]
                 self.__set_loading_state(True)
                 # if self.playlistbar is not None:
                 #     self.playlistbar.close()
@@ -112,9 +112,9 @@ class Front(Screen):
     def launch_category_dialog(self):
         '''Launch the dialog that allow to choose the category being showed'''
         if not self.broken_state:
-            categories = localization["category_names"]
+            categories = get_localization()["category_names"]
             data_manager = get_data_manager()
-            CategoryDialog(categories, data_manager.store["config"]["last_category"], self.set_category).show_dialog()
+            CategoryDialog(categories, data_manager.store["config"]["last_data"]["last_category"], self.set_category).show_dialog()
 
     def add_song_to_playlist(self, song: dict["title": str, "album": str, "artist": str, "file": str, "track": int, "id": int]):
         '''Add a song to the current playing playlist. If there is not a playing playlist create a new one
@@ -148,12 +148,12 @@ class Front(Screen):
 
     def __on_loading_ended(self, _):
         data_manager = get_data_manager()
-        logging.info(f'Last category: {data_manager.store["config"]["last_category"]}')
-        self.set_category(data_manager.store["config"]["last_category"], force_reload=True)
+        logging.info(f'Last category: {data_manager.store["config"]["last_data"]["last_category"]}')
+        self.set_category(data_manager.store["config"]["last_data"]["last_category"], force_reload=True)
 
     def __change_category_async_function(self, selected_category):
         data_manager = get_data_manager()
-        data_manager.put_data(["config", "last_category"], selected_category)
+        data_manager.put_data(["config", 'last_data', "last_category"], selected_category)
         category_elements = data_manager.store["data"][selected_category]
         last_schedule_delay = self.ids["playlist_container"].set_data(category_elements)
         Clock.schedule_once(lambda _: self.__set_loading_state(False), last_schedule_delay + 0.2)
@@ -164,8 +164,3 @@ class Front(Screen):
         elif not state and self._previous_state:
             self.ids.layout.remove_widget(self.loading_spinner)
         self._previous_state = state
-
-    def __localize_category(self, category):
-        for l_i in localization["category_names"]:
-            if l_i[0] == category:
-                return l_i[1]

@@ -6,7 +6,7 @@ from kivymd.app import MDApp
 from kivymd.uix.list import TwoLineAvatarIconListItem
 from kivy.uix.screenmanager import Screen
 from lib.platform.datamanager import get_data_manager
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from kivy.clock import Clock, ClockEvent
 
 class Search(Screen):
@@ -16,7 +16,7 @@ class Search(Screen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.ids.search_field.hint_text = localization["search"]["search_field_hint"]
+        self.ids.search_field.hint_text = get_localization()["search"]["search_field_hint"]
         self.search_event = None
 
     def pressed(self, value):

@@ -4,9 +4,6 @@ from jnius import autoclass, PythonJavaClass, java_method, cast # type:ignore
 from kivy.logger import Logger
 from android import activity as AndroidActivity
 
-
-
-
 Intent = autoclass('android.content.Intent')
 PythonActivity = autoclass('org.kivy.android.PythonActivity')
 Consumer = autoclass('java.util.function.Consumer')
@@ -15,6 +12,7 @@ PlaybackService = autoclass('org.test.naedmusic.PlaybackService')
 PlayerControllerContainer = autoclass('org.test.naedmusic.PlayerControllerContainer')
 PlaybackService.startService(PythonActivity.mActivity)
 mplayer_controller_container = PlayerControllerContainer(PythonActivity.mActivity.getApplicationContext())
+MediaRepository = autoclass('org.test.naedmusic.MediaRepository')
 
 class MyBiFunction(PythonJavaClass):
     __javainterfaces__ = (

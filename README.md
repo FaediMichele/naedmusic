@@ -24,14 +24,44 @@ It saves a file called playlist.json on ~/playlist.json if Windows or linux; on 
 ## For android
 is required to add something in the AndroidManigest.tmpl.xml in the definition of the application
 unfortunately, Buildozer does not allow an external manipulation of the manifest (like using buildozer.spec):
-xml```<service
-    android:name=".PlaybackService"
-    android:foregroundServiceType="mediaPlayback"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="androidx.media3.session.MediaSessionService"/>
-    </intent-filter>
-</service>```
+
+Add in `.buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/naedmusic/templates/AndroidManifest.tmpl.xml`
+
+```
+<application>
+    <meta-data android:name="com.google.android.gms.car.application"  android:resource="@xml/automotive_app_desc"/>
+    <service
+        android:name=".PlaybackService"
+        android:foregroundServiceType="mediaPlayback"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="androidx.media3.session.MediaSessionService"/>
+            <action android:name="android.media.browse.MediaBrowserService"/>
+        </intent-filter>
+    </service>
+</application>
+```
+
+Add in `.buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/naedmusic/templates/build.tmpl.gradle`
+After the dependencies
+```
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+    }
+}
+```
+
+Sometime it happen that gradle raise OutOfMemoryException. In this case edit `.buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/naedmusic/templates/build.tmpl.gradle`.
+
+Add this line (or a greater value than 1024):
+```
+org.gradle.jvmargs=-Xmx2500m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+```
+
+
 
 
 ## Known bug

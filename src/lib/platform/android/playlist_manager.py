@@ -2,12 +2,12 @@ import os
 import random
 from typing import Callable
 
-from lib.platform.android.util import mplayer_controller_container
+from lib.platform.android.util import mplayer_controller_container, MediaRepository
 from lib.platform.android.audio_player import AndroidAudioPlayer
 from lib.platform.playlist_manager import Playlist
 from lib.platform.datamanager import get_data_manager
 
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from kivy.logger import Logger
 from kivy.clock import Clock
 from lib.util import show_snackbar
@@ -196,8 +196,16 @@ class AndroidPlaylist(Playlist):
         if song not in self.songs_loaded:
             data_manager = get_data_manager()
             image_path = data_manager.get_image([os.path.join(data_manager.base_path, song["file"])])
-            mediaItem = mplayer_controller_container.createMediaItem(
-                song['file'], song['artist'], song['title'], song['album'], song['track'], song['id'], image_path)
+
+            mediaItem = MediaRepository.createMediaItem(
+                song['file'],
+                song['artist'],
+                song['title'],
+                song['album'],
+                song['track'],
+                str(song['id']),
+                image_path
+            )
             self.player.addMediaItem(mediaItem)
             self.songs_loaded.append(song)
             if prepare:
@@ -218,10 +226,7 @@ class AndroidPlaylist(Playlist):
     @run_on_ui_thread
     def shuffle(self) -> None:
         '''Shuffle tha playlist without resetting the current song or index'''
-        for _ in range(19):
-            self.playlist = [*self.playlist[1::2], *self.playlist[0::2]]
-            random.shuffle(self.playlist, lambda: random.random())
-        
+        super(AndroidPlaylist, self).shuffle()
         self.load_songs(self.playlist)
 
     @run_on_ui_thread 

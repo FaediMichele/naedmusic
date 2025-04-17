@@ -6,7 +6,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineAvatarIconListItem, TwoLineListItem, TwoLineAvatarIconListItem, ThreeLineListItem
 from kivymd.uix.list.list import CheckboxLeftWidget
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from lib.platform.datamanager import get_data_manager
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import StringProperty
@@ -188,7 +188,7 @@ class AddToPlaylistDialog():
         '''
         if self._delete_dialog is None:
             self.__create_delete_dialog()
-        self._delete_dialog.title = localization["add_to_playlist_dialog"]["delete_ask_title"].format(name=self._playlists[self._last_selected]["name"])
+        self._delete_dialog.title = get_localization()["add_to_playlist_dialog"]["delete_ask_title"].format(name=self._playlists[self._last_selected]["name"])
         self._delete_dialog.open()
 
     def on_rename(self, _):
@@ -201,7 +201,7 @@ class AddToPlaylistDialog():
         '''
         if self._rename_dialog is None:
             self.__create_rename_dialog()
-        self._rename_dialog.title = localization["add_to_playlist_dialog"]["rename_ask_title"].format(name=self._playlists[self._last_selected]["name"])
+        self._rename_dialog.title = get_localization()["add_to_playlist_dialog"]["rename_ask_title"].format(name=self._playlists[self._last_selected]["name"])
         self._rename_dialog.content_cls.ids["text_field"].text = self._playlists[self._last_selected]["name"]
         self._rename_dialog.open()
 
@@ -216,7 +216,7 @@ class AddToPlaylistDialog():
         if self._last_selected is not None:
             if self._rename_dialog is None:
                 self.__create_edit_dialog()
-            self._edit_dialog.title = localization["add_to_playlist_dialog"]["edit_ask_title"].format(name=self._playlists[self._last_selected]["name"])
+            self._edit_dialog.title = get_localization()["add_to_playlist_dialog"]["edit_ask_title"].format(name=self._playlists[self._last_selected]["name"])
             self._edit_dialog.open()
 
 
@@ -230,7 +230,7 @@ class AddToPlaylistDialog():
         '''
         if self._new_dialog is None:
             self.__create_new_dialog()
-        self._new_dialog.title = localization["add_to_playlist_dialog"]["new_ask_title"]
+        self._new_dialog.title = get_localization()["add_to_playlist_dialog"]["new_ask_title"]
         self._new_dialog.open()
 
     def on_close(self, _):
@@ -284,12 +284,12 @@ class AddToPlaylistDialog():
                                 for i, pl in enumerate(self._playlists)]
         
         self._dialog = MDDialog(
-            title=localization["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
+            title=get_localization()["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
             type="confirmation",
             items=self._items,
             buttons=[
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["edit"],
+                    text=get_localization()["add_to_playlist_dialog"]["edit"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_edit,
@@ -297,13 +297,13 @@ class AddToPlaylistDialog():
                     opacity=0
                 ),
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["new"],
+                    text=get_localization()["add_to_playlist_dialog"]["new"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_new
                 ),
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["confirm"],
+                    text=get_localization()["add_to_playlist_dialog"]["confirm"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_confirm
@@ -324,13 +324,13 @@ class AddToPlaylistDialog():
             title="",
             buttons=[
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["delete_ask_yes"],
+                    text=get_localization()["add_to_playlist_dialog"]["delete_ask_yes"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_delete_confirm
                 ),
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["delete_ask_no"],
+                    text=get_localization()["add_to_playlist_dialog"]["delete_ask_no"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_delete_close
@@ -348,40 +348,40 @@ class AddToPlaylistDialog():
             content_cls=NewRenameDialogContent(),
             buttons=[
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["rename_ask_yes"],
+                    text=get_localization()["add_to_playlist_dialog"]["rename_ask_yes"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_rename_confirm
                 ),
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["rename_ask_no"],
+                    text=get_localization()["add_to_playlist_dialog"]["rename_ask_no"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_rename_close
                 ),
             ]
         )
-        self._rename_dialog.content_cls.ids["text_field"].hint_text = localization["add_to_playlist_dialog"]["rename_ask_hint"]
+        self._rename_dialog.content_cls.ids["text_field"].hint_text = get_localization()["add_to_playlist_dialog"]["rename_ask_hint"]
 
     def __create_edit_dialog(self):
         self._edit_dialog = MDDialog(
-            title=localization["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
+            title=get_localization()["add_to_playlist_dialog"]["title"].format(name=self.song["title"]),
             type="confirmation",
             items=[
                 OneLineAvatarIconListItem(
-                    text=localization["add_to_playlist_dialog"]["delete_dialog_init"],
-                    # secondary_text=localization["add_to_playlist_dialog"]["delete_2"],
+                    text=get_localization()["add_to_playlist_dialog"]["delete_dialog_init"],
+                    # secondary_text=get_localization()["add_to_playlist_dialog"]["delete_2"],
                     on_release=self.on_delete
                 ),
                 OneLineAvatarIconListItem(
-                    text=localization["add_to_playlist_dialog"]["rename_dialog_init"],
-                    # secondary_text=localization["add_to_playlist_dialog"]["rename_2"],
+                    text=get_localization()["add_to_playlist_dialog"]["rename_dialog_init"],
+                    # secondary_text=get_localization()["add_to_playlist_dialog"]["rename_2"],
                     on_release=self.on_rename
                 )
             ],
             buttons=[
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["edit_cancel"],
+                    text=get_localization()["add_to_playlist_dialog"]["edit_cancel"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_edit_cancel
@@ -398,20 +398,20 @@ class AddToPlaylistDialog():
             content_cls=NewRenameDialogContent(),
             buttons=[
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["new_ask_yes"],
+                    text=get_localization()["add_to_playlist_dialog"]["new_ask_yes"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_new_confirm
                 ),
                 MDFlatButton(
-                    text=localization["add_to_playlist_dialog"]["new_ask_no"],
+                    text=get_localization()["add_to_playlist_dialog"]["new_ask_no"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_new_close
                 ),
             ]
         )
-        self._new_dialog.content_cls.ids["text_field"].hint_text = localization["add_to_playlist_dialog"]["new_ask_hint"]
+        self._new_dialog.content_cls.ids["text_field"].hint_text = get_localization()["add_to_playlist_dialog"]["new_ask_hint"]
 
     def __calculate_new_playlist_data(self):
         for i, playlist in enumerate(self._playlists):

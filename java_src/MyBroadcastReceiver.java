@@ -36,12 +36,10 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
         } catch(IllegalArgumentException e){
             e.printStackTrace();
         }
-        
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        
         this.callback.apply(context, intent);
     }
 

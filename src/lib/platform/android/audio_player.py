@@ -14,7 +14,7 @@ Player = autoclass('androidx.media3.common.Player')
 
 MyBroadcastReceiver = autoclass('org.test.naedmusic.MyBroadcastReceiver')
 MyListener = autoclass('org.test.naedmusic.MyListener')
-
+MediaRepository = autoclass('org.test.naedmusic.MediaRepository')
 
 class AndroidAudioPlayer(AudioPlayer):
     '''AudioPlayer for Android. Use android.media.MediaPlayer'''
@@ -163,7 +163,15 @@ class AndroidAudioPlayer(AudioPlayer):
     def __load(self, filename, song):
         data_manager = get_data_manager()
         image_path = data_manager.get_image([os.path.join(data_manager.base_path, song["file"])])
-        self.mplayer_controller.setMediaItem(mplayer_controller_container.createMediaItem(
-            filename, song['artist'], song['title'], song['album'], song['track'], song['id'], image_path))
+        self.mplayer_controller.setMediaItem(MediaRepository.createMediaItem(
+            ["queue"],
+            filename,
+            song['artist'],
+            song['title'],
+            song['album'],
+            song['track'],
+            str(song['id']),
+            image_path
+        ))
         self.mplayer_controller.prepare()
         self.length = self.mplayer_controller.getDuration() / 1000

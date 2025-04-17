@@ -3,11 +3,11 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.uix.list.list import CheckboxLeftWidget
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from typing import Callable, Any
 
 class CategoryDialog():
-    '''Dialog for selecting the category to show. The categories are defined in :py:const:`localization.localization["category_names"]`.
+    '''Dialog for selecting the category to show. The categories are defined in :py:const:`localization["category_names"]`.
     Show a Checkbox exclusive list, one for each category. Contains 2 buttons: confirm and cancel
 
     Attributes
@@ -22,7 +22,7 @@ class CategoryDialog():
     '''
     dialog: MDDialog = None
 
-    def __init__(self, item_list: list[tuple[str, str]], initial_category: str, on_dialog_ended: Callable[[str], Any], **kwargs):
+    def __init__(self, item_list: dict[str, str], initial_category: str, on_dialog_ended: Callable[[str], Any], **kwargs):
         '''Create the CategoryDialog object.
 
         Arguments
@@ -46,21 +46,21 @@ class CategoryDialog():
         self.dialog.open()
 
     def __create_dialog(self):        
-        self.items = [ItemConfirmExclusive(tag=tag, text=name, value=tag==self.initial_category) for (tag, name) in self.item_list]
+        self.items = [ItemConfirmExclusive(tag=tag, text=name, value=tag==self.initial_category) for tag, name in self.item_list.items()]
         
         self.dialog = MDDialog(
-            title=localization["category_dialog"]["title"],
+            title=get_localization()["category_dialog"]["title"],
             type="confirmation",
             items=self.items,
             buttons=[
                 MDFlatButton(
-                    text=localization["category_dialog"]["cancel"],
+                    text=get_localization()["category_dialog"]["cancel"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_cancel
                 ),
                 MDFlatButton(
-                    text=localization["category_dialog"]["confirm"],
+                    text=get_localization()["category_dialog"]["confirm"],
                     theme_text_color="Custom",
                     text_color=MDApp.get_running_app().theme_cls.primary_color,
                     on_release=self.on_confirm

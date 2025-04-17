@@ -1,5 +1,5 @@
 kivy[base,media,tuio,sdl2,full]
-kivymd=1.0.1
+kivymd==1.0.1
 pillow
 mutagen
 ffpyplayer

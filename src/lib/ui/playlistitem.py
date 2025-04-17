@@ -3,7 +3,7 @@ from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
 from kivymd.uix.snackbar import Snackbar
 from lib.platform.datamanager import get_data_manager
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from lib.util import show_snackbar
 
 class PlaylistItem(MDCard):
@@ -55,5 +55,5 @@ class PlaylistItem(MDCard):
         if len(self.data) > 0:
             MDApp.get_running_app().start_playlist(self.data)
         else:
-            show_snackbar(localization["empty_playlist"])
+            show_snackbar(get_localization()["empty_playlist"])
         

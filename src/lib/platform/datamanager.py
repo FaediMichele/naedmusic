@@ -1,12 +1,17 @@
 from kivy.utils import platform
 from kivy.storage.jsonstore import JsonStore
-from lib.localization import localization
 from mutagen.easyid3 import EasyID3
 from plyer import filechooser
+from kivy.logger import Logger
+
+from lib.platform.localization import get_localization
+
+import random
 from typing import Any
 import os
 import re
-from kivy.logger import Logger
+from pathlib import Path
+import json
 
 
 implemented_platoforms = ["Windows", "Android", "Linux"]
@@ -47,14 +52,9 @@ def get_data_manager(callback=lambda dm:None):
             __data_manager = WindowsDataManager()
         elif platform == "android":
             from lib.platform.android.data_manager import AndroidDataManager
-            def my_callback(status):
-                if status:
-                    global __data_manager
-                    __data_manager = AndroidDataManager()
-                callback(status)
-            
+                
             if not AndroidDataManager.check_permissions():
-                AndroidDataManager.ask_permissions(my_callback)
+                AndroidDataManager.ask_permissions(callback)
                 return None
             __data_manager = AndroidDataManager()
         elif platform == "linux":
@@ -85,7 +85,9 @@ class DataManager():
     base_path: str = None
     store: JsonStore = None
 
-    def __init__(self, base_path=os.path.expanduser("~/Music"), data_file_name=os.path.expanduser("~/playlist.json")):
+    def __init__(self,
+                 base_path=os.path.expanduser("~/Music"),
+                 data_file_name=os.path.expanduser("~/playlist.json")):
         '''Create new DataManager
         
         Arguments
@@ -98,10 +100,21 @@ class DataManager():
         self.base_path = base_path
         self.store = JsonStore(data_file_name)
 
+
         if not self.store.exists("data"):
             new_data = self.__build_json(self.base_path)
             self.store.put("data", **new_data)
-            self.store.put("config", **{"base_path": base_path, "shuffle": True, "last_category": "artist"})
+            self.store.put("config", **{
+                "base_path": base_path,
+                "shuffle": True,
+                "last_data": {
+                    "last_category": "artist",
+                    "last_playlist": "",
+                    "last_playlist_name": "",
+                    "last_song": "",
+                    "last_song_time": -1,
+                }
+            })
             Logger.info(f"Data Saved in {data_file_name}")
     
     def put_data(self, path:list[str], value: Any):
@@ -117,7 +130,7 @@ class DataManager():
         self.store[path[0]] = self.__put_data_rec(self.store[path[0]], path[1:], value)
         Logger.info(f"Data updated: {path}")
 
-    def get_image(self, songs: list[str]) -> str:
+    def get_image(self, songs: list[str], is_random=False) -> str:
         '''Search an image in a list of songs. Search for an image in the same folder of the songs.
         
         Arguments
@@ -131,13 +144,18 @@ class DataManager():
             Path to an image. If not image is found return ""
         '''
         folders = set([os.path.dirname(s) for s in songs])
+        all_images = set()
         for dirname in folders:
             regex = re.compile("\.(jpg|png)$")
             for path, _, files in os.walk(os.path.join(self.base_path, dirname)):
                 for file in files:
                     if regex.search(file):
-                        return os.path.join(path, file)
-        return "data/gelbe_Note.png"
+                        all_images.add(os.path.join(path, file))
+                        if not is_random:
+                            return all_images.pop()
+        if len(all_images) > 0:
+            return random.sample(list(all_images), 1)[0]
+        return "assets/gelbe_Note.png"
 
     def check_and_run_update(self):
         '''Check if there are new songs in the music folder or if some songs are removed. It update the storage file'''
@@ -210,21 +228,27 @@ class DataManager():
             base[path[0]] = self.__put_data_rec(base[path[0]], path[1:], value) 
             return base
         return value
-        
-    
 
     def __create__list(self, files, music_folder):
         # TODO multithread
+        def get_title(filename):
+            title = re.match(r"[\d\s\-#\.]*(.+)", Path(filename).stem)
+            if title is not None:
+                return title[1]
+            else:
+                return re.sub(r"^([0-9]*)?\s?[-#.]?\s?(.*)$", r"\2", Path(filename).stem),
         songs = []
         for f in files:
             try:
                 id3 = EasyID3(f)
+
                 songs.append({
-                    "title": id3["title"][0],
+                    "title": get_title(id3["title"][0]),
                     "album": id3["album"][0],
                     "artist": id3["artist"][0],
                     "track": int(id3["tracknumber"][0]),
-                    "file": f
+                    "file": f,
+                    "image": self.get_image([f])
                 })
             except:
                 def get_track(f):
@@ -238,13 +262,14 @@ class DataManager():
                     while os.path.dirname(folder_name) != music_folder:
                         folder_name = os.path.dirname(folder_name)
                     return os.path.basename(folder_name)
-
+                
                 songs.append({
-                    "title": re.sub(r"^([0-9]*)?\s?[-#.]?\s?(.*)\.(wav|mp3|flac])$", r"\2", os.path.basename(f)),
+                    "title": get_title(f),
                     "album": re.sub(r"^^([0-9]*)?\s?[\.#-]?\s?(.*) ((\(*[0-9]{4}\)?))?$", r"\2", os.path.basename(os.path.dirname(f))+ ("" if os.path.basename(os.path.dirname(f)).endswith(")") else " ")),
                     "artist": get_artist(music_folder, f),
                     "track": get_track(os.path.basename(f)),
-                    "file": f
+                    "file": f,
+                    "image": self.get_image([f])
                 })
         songs = sorted(songs, key=lambda song:song["artist"]+song["album"]+str(song["track"])+song["title"])
         for k, s in enumerate(songs):
@@ -252,6 +277,7 @@ class DataManager():
         return songs
 
     def __build_json(self, music_folder):
+        
         files = self.__traverse_folder(music_folder, re.compile("\.(wav|mp3|flac)$"))
         songs = self.__create__list(files, music_folder)
 
@@ -259,7 +285,7 @@ class DataManager():
             "songs": songs,
             "artist": self.__filter_by_field(songs, "artist"),
             "album": self.__filter_by_field(songs, "album"),
-            "playlist": [{"name": localization["favorites"], "pinned": True, "songs": []}], 
+            "playlist": [{"name": get_localization()["favorites"], "pinned": True, "songs": []}], 
         }
 
     def __filter_by_field(self, songs, field):

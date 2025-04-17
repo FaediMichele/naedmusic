@@ -3,7 +3,7 @@ from kivymd.toast.kivytoast.kivytoast import toast
 from plyer import filechooser
 from kivy.logger import Logger
 from kivy.utils import platform
-from lib.localization import localization
+from lib.platform.localization import get_localization
 from kivymd.app import MDApp
 
 from lib.platform.datamanager import get_data_manager, reload_data_manager
@@ -43,7 +43,7 @@ class Menu(MDNavigationDrawer):
                     path=os.path.expanduser("~"),
                     multiple=False,
                     filters=["*json"],
-                    title=localization["filechooser"]["title_save"], 
+                    title=get_localization()["filechooser"]["title_save"], 
                     callback=on_selection)
 
         data_manager = get_data_manager(on_ready_data_manager)
@@ -73,7 +73,7 @@ class Menu(MDNavigationDrawer):
                     path=os.path.expanduser("~"),
                     multiple=False,
                     filters=["*json"],
-                    title=localization["filechooser"]["title_load"], 
+                    title=get_localization()["filechooser"]["title_load"], 
                     on_selection=on_selection)
             
 

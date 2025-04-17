@@ -14,10 +14,10 @@ package.domain = org.test
 source.dir = ./src
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas
+#source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,images/*.png,images/*.jpg
+source.include_patterns = src/assets/*
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -30,7 +30,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 0.3
+version = 0.4
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
@@ -45,7 +45,7 @@ requirements = python3,kivy,pillow,kivymd==1.0.1,mutagen,ffpyplayer,nltk,regex,p
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/assets/gelbe_Note.png
+#presplash.filename = %(source.dir)s/assets/gelbe_Note.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/assets/gelbe_Note.png
@@ -87,7 +87,7 @@ fullscreen = 0
 # see https://lottiefiles.com/ for examples and https://airbnb.design/lottie/
 # for general documentation.
 # Lottie files can be created using various tools, like Adobe After Effect or Synfig.
-#android.presplash_lottie = "path/to/lottie/file.json"
+android.presplash_lottie = src/assets/presplash_lottie.json
 
 # (str) Adaptive icon of the application (used if Android API level is 26+ at runtime)
 #icon.adaptive_foreground.filename = %(source.dir)s/data/icon_fg.png
@@ -103,7 +103,7 @@ android.permissions = INTERNET, READ_PHONE_STATE, READ_MEDIA_AUDIO,  READ_MEDIA_
 android.api = 34
 
 # (int) Minimum API your APK / AAB will support.
-#android.minapi = 21
+android.minapi = 29
 
 # (int) Android SDK version to use
 #android.sdk = 20
@@ -186,10 +186,10 @@ android.add_src = java_src
 # Either form may be used, and assets need not be in 'source.include_exts'.
 # 1) android.add_assets = source_asset_relative_path
 # 2) android.add_assets = source_asset_path:destination_asset_relative_path
-#android.add_assets =
+android.add_assets = src/assets/
 
 # (list) Gradle dependencies to add
-android.gradle_dependencies = androidx.activity:activity:1.2.0, androidx.fragment:fragment:1.3.0, androidx.core:core:1.12.0, androidx.core:core-role:1.0.0, androidx.core:core-animation:1.0.0-rc01, androidx.media3:media3-exoplayer:1.3.0, androidx.media3:media3-ui:1.3.0, androidx.media3:media3-ui-leanback:1.3.0, androidx.media3:media3-session:1.3.0, androidx.media3:media3-container:1.3.0, androidx.media3:media3-database:1.3.0, androidx.media3:media3-decoder:1.3.0, androidx.media3:media3-datasource:1.3.0, androidx.media3:media3-common:1.3.0
+android.gradle_dependencies = androidx.activity:activity:1.9.1, androidx.fragment:fragment:1.8.2, androidx.core:core:1.13.1, androidx.core:core-role:1.0.0, androidx.core:core-animation:1.0.0, androidx.media3:media3-exoplayer:1.3.0, androidx.media3:media3-ui:1.3.0, androidx.media3:media3-ui-leanback:1.3.0, androidx.media3:media3-session:1.3.0, androidx.media3:media3-container:1.3.0, androidx.media3:media3-database:1.3.0, androidx.media3:media3-decoder:1.3.0, androidx.media3:media3-datasource:1.3.0, androidx.media3:media3-common:1.3.0, androidx.car.app:app:1.4.0, androidx.car.app:app-projected:1.4.0
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
@@ -227,7 +227,7 @@ android.enable_androidx = True
 #android.manifest.intent_filters =
 
 # (list) Copy these files to src/main/res/xml/ (used for example with intent-filters)
-#android.res_xml = PATH_TO_FILE,
+android.res_xml = res_xml/automotive_app_desc.xml
 
 # (str) launchMode to set for the main activity
 android.manifest.launch_mode = singleTop
@@ -244,7 +244,7 @@ android.manifest.launch_mode = singleTop
 #android.wakelock = False
 
 # (list) Android application meta-data to set (key=value format)
-#android.meta_data =
+#android.meta_data = 
 
 # (list) Android library project to add (will be added in the
 # project.properties automatically.)
